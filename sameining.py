@@ -1,3 +1,6 @@
+#This is a program that takes DMU5 test files and collects in one file along
+#with BLUP from old ferility breeding evaluation to be compared. 
+
 import pandas as pd
 import numpy as np
 

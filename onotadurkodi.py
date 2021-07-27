@@ -1,4 +1,7 @@
 
+#This a file where python code I've tried to use or used at one point in
+#the programs but removed is stored.
+
 #wrong observations printed into a datafile
 wrong2_df.to_csv("wrong2.txt", index=False, sep="\t")
 

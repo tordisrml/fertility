@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+#This is a program to check the number of cows per herd-year group 
 
 dmu_fertility = pd.read_csv(
     'dmu_fertility2001.txt',

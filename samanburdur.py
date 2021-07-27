@@ -5,6 +5,7 @@ import math
 import statistics
 import scipy.stats
 
+#This is a program to compare old and new fertility evaluation. 
 
 saman = pd.read_csv(
     "../data/saman.txt",

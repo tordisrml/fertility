@@ -1,3 +1,7 @@
+#This is a program that takes the file bassitdm.????
+#where BLUP results for all animals is stored and collects the fertility blup
+#to be compared in another file
+
 import pandas as pd
 import numpy as np
 

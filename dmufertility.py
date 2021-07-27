@@ -592,6 +592,9 @@ dmu_fertility = data_use2[['code_id','H_BY','HC1','HC2','HC3','IYM0','IYM1','IYM
 dmu_fertility.to_csv("../data/dmu_fertility2001.txt", index=False, header=False, sep=' ')
 
 
+
+#This is code to create a datafile to be used in some statistical analyses.
+#-----------------------------------------------------------------------
 # #Basic statistics
 # data_use['birthy'] = data_use[
 #     ['birth']
