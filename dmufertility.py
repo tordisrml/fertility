@@ -452,40 +452,43 @@ cows_df.loc[
 (cows_df['first_3'].notnull().astype(int) == 1)
 ,'check'] = 111
 #---------------------------------------------------------------------------
+
 #---------------------------------------------------------------------------
-# #Creating fixed effect Herd - Birth year / Calving years
-# s = cows_df['herd'] * 100
-# cows_df['H_BY'] = s + cows_df['birth'].dt.year
-# cows_df['HC1'] = s + cows_df['calv1'].dt.year
-# cows_df['HC2'] = s + cows_df['calv2'].dt.year
-# cows_df['HC3'] = s + cows_df['calv3'].dt.year
-# cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
-#     ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
-#ATH AÐ BREYTA KANNSKI Í LOCATE ÞAR SEM CALV ER EKKI 0 EÐA NaT
-#ANNARS VEÐRUR 00 ÞAÐ SAMA OG ÞEGAR GRIPIR ERU
-# EÐA NEI, ÞAÐ EIGA ENGIR GRIPIR EKKI AÐ VERA MEÐ HERD OG BIRTH YEAR
-#OG ALLAR SÆÐINGAR EIGA AÐ VERA EFTIR 2001
 #Creating fixed effect Herd - Birth year / Calving years
 s = cows_df['herd'] * 100
-cows_df['H_BY'] = s + cows_df['birth'].dt.strftime('%y').replace('NaT', '0').astype(int)
-cows_df['HC1'] = s + cows_df['calv1'].dt.strftime('%y').replace('NaT', '0').astype(int)
-cows_df['HC2'] = s + cows_df['calv2'].dt.strftime('%y').replace('NaT', '0').astype(int)
-cows_df['HC3'] = s + cows_df['calv3'].dt.strftime('%y').replace('NaT', '0').astype(int)
+#herd - birth year
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['birth'].notnull().astype(int) == 1),
+'H_BY'] = (s + cows_df['birth'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 1
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv1'].notnull().astype(int) == 1),
+'HC1'] = (s + cows_df['calv1'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 2
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 1),
+'HC2'] = (s + cows_df['calv2'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 3
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv3'].notnull().astype(int) == 1),
+'HC3'] = (s + cows_df['calv3'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#Filling emty cells with 0 and setting as integers
 cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
     ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
-
+#---------------------------------------------------------------------------
 #Creating first Insemanation year - month fixed effect
 cows_df[['IYM0','IYM1','IYM2','IYM3']] = cows_df[
     ['first_h','first_1','first_2','first_3']
     ].apply(
     lambda s: s.dt.strftime('%Y%m').replace('NaT', '0').astype(int))
-
+#---------------------------------------------------------------------------
 #Filling in for missing values for technician in heifer ins
 cows_df['tech_h'] = cows_df['tech_h'].fillna(0, downcast='infer')
-
+#---------------------------------------------------------------------------
 #Fixed effects - Age at first ins in MONTHS - Age at calving in MONTHS
 cows_df[['AGEi_h','AGEc_1','AGEc_2','AGEc_3']] = cows_df[
     ['AGEi_h','AGEc_1','AGEc_2','AGEc_3']
