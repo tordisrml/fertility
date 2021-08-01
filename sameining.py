@@ -1,12 +1,11 @@
 #This is a program that takes DMU5 test files and collects in one file along
 #with BLUP from old ferility breeding evaluation to be compared.
 
+#Takes ICF and IFL SOL files from different DMU runs
+
 import pandas as pd
 import numpy as np
 
-import math
-import statistics
-import scipy.stats
 
 #Reading in id codes to replace in SOL files
 id_code = pd.read_csv(

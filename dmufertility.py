@@ -114,7 +114,7 @@ df.loc[
 'ins_lact'] = 99.0
 #Ins that happen before 2008 are marked as 88
 df.loc[
-(df['ins'] < '2001-01-01'),
+(df['ins'] < '2008-01-01'),
 'ins_lact'] = 88.0
 #Ins have comments located are marked as 77
 df.loc[
@@ -533,21 +533,21 @@ data_not_used = cows_df[(
 
 
 #Counting number of cows per Herd-year class
-data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
-data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
-data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
-data_use['HC3_c'] = data_use.groupby('HC3')['HC3'].transform('count')
-#Locate and mark cows that are alone in herd year class
-data_use.loc[
-(data_use['H_BY_c'] == 1) |
-(data_use['HC1_c'] == 1) |
-(data_use['HC2_c'] == 1) |
-(data_use['HC3_c'] == 1)
-,'check2'] = 1
-#Only use cows that are not alone in herd-year class
-data_use2 = data_use[(
-    data_use['check2'].notnull().astype(int) == 0)
-]
+# data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
+# data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
+# data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
+# data_use['HC3_c'] = data_use.groupby('HC3')['HC3'].transform('count')
+# #Locate and mark cows that are alone in herd year class
+# data_use.loc[
+# (data_use['H_BY_c'] == 1) |
+# (data_use['HC1_c'] == 1) |
+# (data_use['HC2_c'] == 1) |
+# (data_use['HC3_c'] == 1)
+# ,'check2'] = 1
+# #Only use cows that are not alone in herd-year class
+# data_use2 = data_use[(
+#     data_use['check2'].notnull().astype(int) == 0)
+# ]
 
 # #Checks again on herd-year classes
 # data_use2['H_BY_c'] = data_use2.groupby('H_BY')['H_BY'].transform('count')
@@ -568,7 +568,7 @@ data_use2 = data_use[(
 #Filling in missin values for DMU, -999.0 for reals
 #Real columns
 realc = ['CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']
-data_use2[realc] = data_use2[realc].fillna(-999.0)
+data_use[realc] = data_use[realc].fillna(-999.0)
 
 #---------------------------------------------------------------------------
 #File with code numbers for DMU runs
@@ -580,49 +580,48 @@ code_df = pd.read_csv(
     names=['id','code_id']
     )
 
-data_use2 = pd.merge(left=data_use2, right=code_df, on='id', how='left')
+data_use = pd.merge(left=data_use, right=code_df, on='id', how='left')
 
 # ---- AIS AS A FIXED EFFECT FOR IFL??????
-# ----- ATHUGA HERD SIZE
 
 #---------------------------------------------------------------------------
 #Creating the DMU datafile
-dmu_fertility = data_use2[['code_id','H_BY','HC1','HC2','HC3','IYM0','IYM1','IYM2',
+dmu_fertility = data_use[['code_id','H_BY','HC1','HC2','HC3','IYM0','IYM1','IYM2',
     'IYM3','AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
     'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
 #,'H_BY_c','HC1_c','HC2_c','HC3_c'
 #DMU datafile
-dmu_fertility.to_csv("../data/dmu_fertility2001.txt", index=False, header=False, sep=' ')
+dmu_fertility.to_csv("../data/dmu_fertility.txt", index=False, header=False, sep=' ')
 
 
 
-#This is code to create a datafile to be used in some statistical analyses.
-#-----------------------------------------------------------------------
-# #Basic statistics
-# data_use['birthy'] = data_use[
-#     ['birth']
-#     ].apply(
-#     lambda s: s.dt.strftime('%Y').replace('NaT', '0').astype(int))
-#
-# fertility_stat = data_use[['id','birthy','no_calv',
-#     'AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
-#     'T_h','T_1','T_2','T_3',
-#     'gest1','gest2','gest3','CI12','CI23','CI34',
-#     'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
-#
-# fertility_stat[
-#     ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
-#     ] = fertility_stat[
-#     ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
-#     ].fillna(-999.0)
-# #Basic statistics datafile
-# fertility_stat.to_csv("../data/fertility_stat.txt", index=False, header=False, sep=' ')
+# This is code to create a datafile to be used in some statistical analyses.
+# -----------------------------------------------------------------------
+#Basic statistics
+data_use['birthy'] = data_use[
+    ['birth']
+    ].apply(
+    lambda s: s.dt.strftime('%Y').replace('NaT', '0').astype(int))
+
+fertility_stat = data_use[['id','birthy','no_calv',
+    'AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
+    'T_h','T_1','T_2','T_3',
+    'gest1','gest2','gest3','CI12','CI23','CI34',
+    'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
+
+fertility_stat[
+    ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
+    ] = fertility_stat[
+    ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
+    ].fillna(-999.0)
+#Basic statistics datafile
+fertility_stat.to_csv("../data/fertility_stat.txt", index=False, header=False, sep=' ')
 
 
 #print(cows_df.iloc[50000:50015])
 print(dmu_fertility.iloc[50000:50015])
 print(cows_df.info())
-print(data_use2.info())
+print(data_use.info())
 print(data_not_used.info())
 #print(cows_df.columns.tolist())
 #print(data_use['id'].nunique())

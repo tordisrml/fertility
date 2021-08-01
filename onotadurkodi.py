@@ -154,3 +154,26 @@ cows_df = pd.read_fwf(
     header=None,
     names=['id','herd','birth','death','calv1','calv2','calv3','calv4']
     )
+
+# #Creating fixed effect Herd - Birth year / Calving years
+# s = cows_df['herd'] * 100
+# cows_df['H_BY'] = s + cows_df['birth'].dt.year
+# cows_df['HC1'] = s + cows_df['calv1'].dt.year
+# cows_df['HC2'] = s + cows_df['calv2'].dt.year
+# cows_df['HC3'] = s + cows_df['calv3'].dt.year
+# cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
+#     ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
+
+    s = cows_df['herd'] * 100
+    cows_df['H_BY'] = s + cows_df['birth'].dt.strftime('%y').replace('NaT', '0').astype(int)
+    cows_df['HC1'] = s + cows_df['calv1'].dt.strftime('%y').replace('NaT', '0').astype(int)
+    cows_df['HC2'] = s + cows_df['calv2'].dt.strftime('%y').replace('NaT', '0').astype(int)
+    cows_df['HC3'] = s + cows_df['calv3'].dt.strftime('%y').replace('NaT', '0').astype(int)
+    cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
+        ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
+
+
+dmu_fertility[['birth','calv1','calv2','calv3']] = dmu_fertility[
+    ['birth','calv1','calv2','calv3']
+    ].apply(
+    lambda x: pd.to_datetime(x, format='%Y-%m-%d'))
