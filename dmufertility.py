@@ -532,6 +532,7 @@ data_not_used = cows_df[(
 #data_not_used.to_excel("../data/data_not_used.xlsx", index=False)
 
 
+#THIS PART IS STILL UNDEVELOPED. NO HERD YEAR CLEANING ARE CURRENTLY DONE
 #Counting number of cows per Herd-year class
 # data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
 # data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
@@ -595,27 +596,27 @@ dmu_fertility.to_csv("../data/dmu_fertility.txt", index=False, header=False, sep
 
 
 
-# This is code to create a datafile to be used in some statistical analyses.
-# -----------------------------------------------------------------------
-#Basic statistics
-data_use['birthy'] = data_use[
-    ['birth']
-    ].apply(
-    lambda s: s.dt.strftime('%Y').replace('NaT', '0').astype(int))
-
-fertility_stat = data_use[['id','birthy','no_calv',
-    'AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
-    'T_h','T_1','T_2','T_3',
-    'gest1','gest2','gest3','CI12','CI23','CI34',
-    'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
-
-fertility_stat[
-    ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
-    ] = fertility_stat[
-    ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
-    ].fillna(-999.0)
-#Basic statistics datafile
-fertility_stat.to_csv("../data/fertility_stat.txt", index=False, header=False, sep=' ')
+# # This is code to create a datafile to be used in some statistical analyses.
+# # -----------------------------------------------------------------------
+# #Basic statistics
+# data_use['birthy'] = data_use[
+#     ['birth']
+#     ].apply(
+#     lambda s: s.dt.strftime('%Y').replace('NaT', '0').astype(int))
+#
+# fertility_stat = data_use[['id','birthy','no_calv',
+#     'AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
+#     'T_h','T_1','T_2','T_3',
+#     'gest1','gest2','gest3','CI12','CI23','CI34',
+#     'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
+#
+# fertility_stat[
+#     ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
+#     ] = fertility_stat[
+#     ['T_h','T_1','T_2','T_3','gest1','gest2','gest3','CI12','CI23','CI34',]
+#     ].fillna(-999.0)
+# #Basic statistics datafile
+# fertility_stat.to_csv("../data/fertility_stat.txt", index=False, header=False, sep=' ')
 
 
 #print(cows_df.iloc[50000:50015])

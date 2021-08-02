@@ -32,7 +32,7 @@ ped['code_id'] = ped['code_id'] + 1
 
 #Creation of a file with animal numbers and matching code numbers
 code = ped[['id','code_id']].copy() #dataset with codenumbers for everyone
-code.to_csv('id_code.txt', index=False, header=False, sep=' ')
+code.to_csv('../data/id_code.txt', index=False, header=False, sep=' ')
 
 #renaming the columns for a pedigree file with code id's
 code.columns = ['sire', 'code_sire']
@@ -52,9 +52,11 @@ ped = ped.sort_values(by=['code_id'])
 dmu_ped_code = ped[['code_id','code_sire','code_dam','code_id2']]
 dmu_ped_code.to_csv("../data/dmu_ped_code.ped", index=False, header=False, sep=' ')
 
-# #Creation of a pedigree file with with normal id's
-# dmu_ped = ped[['id','dam','sire']]
-# dmu_ped.to_csv("../data/dmu_ped.ped", index=False, header=False, sep=' ')
+
+ped = ped.sort_values(by=['id'])
+#Creation of a pedigree file with with normal id's
+dmu_ped = ped[['id','dam','sire']]
+dmu_ped.to_csv("../data/dmu_ped.ped", index=False, header=False, sep=' ')
 
 #--------------------------------------------------------------------
 

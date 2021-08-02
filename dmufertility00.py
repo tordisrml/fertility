@@ -114,7 +114,7 @@ df.loc[
 'ins_lact'] = 99.0
 #Ins that happen before 2008 are marked as 88
 df.loc[
-(df['ins'] < '2001-01-01'),
+(df['ins'] < '2008-01-01'),
 'ins_lact'] = 88.0
 #Ins have comments located are marked as 77
 df.loc[
@@ -532,7 +532,7 @@ data_not_used = cows_df[(
 #data_not_used.to_excel("../data/data_not_used.xlsx", index=False)
 
 
-# #Counting number of cows per Herd-year class
+#Counting number of cows per Herd-year class
 # data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
 # data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
 # data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
@@ -583,7 +583,6 @@ code_df = pd.read_csv(
 data_use = pd.merge(left=data_use, right=code_df, on='id', how='left')
 
 # ---- AIS AS A FIXED EFFECT FOR IFL??????
-# ----- ATHUGA HERD SIZE
 
 #---------------------------------------------------------------------------
 #Creating the DMU datafile
@@ -592,12 +591,12 @@ dmu_fertility = data_use[['code_id','H_BY','HC1','HC2','HC3','IYM0','IYM1','IYM2
     'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
 #,'H_BY_c','HC1_c','HC2_c','HC3_c'
 #DMU datafile
-dmu_fertility.to_csv("../data/dmu_fertilityHYtest.txt", index=False, header=False, sep=' ')
+dmu_fertility.to_csv("../data/dmu_fertility.txt", index=False, header=False, sep=' ')
 
 
 
-#This is code to create a datafile to be used in some statistical analyses.
-#-----------------------------------------------------------------------
+# # This is code to create a datafile to be used in some statistical analyses.
+# # -----------------------------------------------------------------------
 # #Basic statistics
 # data_use['birthy'] = data_use[
 #     ['birth']
