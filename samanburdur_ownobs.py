@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-import seaborn
+import seaborn as sns
 
 import math
 import statistics
@@ -25,6 +25,32 @@ saman = pd.read_csv(
         'CI12_I','CI23_I','CI34_I',
         'fertility_1','fertility_2','fertility_3','frjosemi']
     )
+
+ownobs = pd.read_csv(
+    "../data/dmu_fertility.txt",
+    header=None,
+    sep=' ',
+    names=['code_id',
+        'CR0_I','ICF1_I','ICF2_I','ICF3_I','IFL1_I','IFL2_I','IFL3_I',
+        'CR0_P','ICF1_P','ICF2_P','ICF3_P','IFL1_P','IFL2_P','IFL3_P',
+        'CI12_I','CI23_I','CI34_I',
+        'fertility_1','fertility_2','fertility_3','frjosemi']
+    )
+
+#Reading in id codes to replace in SOL files
+id_code = pd.read_csv(
+    "/home/thordis/data/id_code.txt",
+    header=None,
+    sep = ' ',
+    names=['id','code_id']
+    )
+
+ownobs = pd.merge(left=ownobs[
+    ['code_id']
+    ], right=id_code[['id','code_id']], on='code_id', how='left')
+
+saman = pd.merge(left=ownobs['id'], right=saman, on='id', how='left')
+
 
 #Make birth year from id number an integer
 saman['BY'] = (saman.id.astype(str).str[:4]).astype(int)
@@ -93,28 +119,28 @@ saman['new_P'] = (saman['CR0_P'] * 0.2 +
     saman['IFL_P'] * 0.5 )
 
 #Only plot animals born after 2000
-saman2006 = saman[saman['BY'] > 2006]
+# saman2006 = saman[saman['BY'] > 2006]
 
-#Correlation heat map for all traits in dataframe!
-plt.figure(figsize=(8,8))
-seaborn.heatmap(saman2006[['CR0_I', 'CR0_P',
-    'ICF1_I','ICF2_I','ICF3_I',
-    'ICF1_P','ICF2_P','ICF3_P',
-    'IFL1_I','IFL2_I','IFL3_I',
-    'IFL1_P','IFL2_P','IFL3_P',
-    'CI12_I','CI23_I','CI34_I',
-    'fertility_1','fertility_2','fertility_3','frjosemi']].corr(), annot=True, cmap='coolwarm')
-plt.title('Fylgni á milli kynbótaeinkunna fyrir eiginleika hjá gripum fæddum eftir 2006', fontsize = 20)
-
-# Correlation heat map for all traits in dataframe!
-plt.figure(figsize=(8,8))
-seaborn.heatmap(saman2006[['CR0_I','CR0_P',
-    'ICF_I','ICF_P',
-    'IFL_I','IFL_P',
-    'new_I', 'new_P',
-    'CI_I',
-    'fertility_1','fertility_2','fertility_3','frjosemi']].corr(), annot=True, cmap='coolwarm')
-plt.title('Fylgni á milli kynbótaeinkunna fyrir eiginleika hjá gripum fæddum eftir 2006', fontsize = 20)
+# #Correlation heat map for all traits in dataframe!
+# plt.figure(figsize=(8,8))
+# seaborn.heatmap(saman[['CR0_I', 'CR0_P',
+#     'ICF1_I','ICF2_I','ICF3_I',
+#     'ICF1_P','ICF2_P','ICF3_P',
+#     'IFL1_I','IFL2_I','IFL3_I',
+#     'IFL1_P','IFL2_P','IFL3_P',
+#     'CI12_I','CI23_I','CI34_I',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']].corr(), annot=True, cmap='coolwarm')
+# plt.title('Fylgni á milli kynbótaeinkunna fyrir eiginleika hjá gripum fæddum eftir 2006', fontsize = 20)
+#
+# # Correlation heat map for all traits in dataframe!
+# plt.figure(figsize=(8,8))
+# seaborn.heatmap(saman[['CR0_I','CR0_P',
+#     'ICF_I','ICF_P',
+#     'IFL_I','IFL_P',
+#     'new_I', 'new_P',
+#     'CI_I',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']].corr(), annot=True, cmap='coolwarm')
+# plt.title('Fylgni á milli kynbótaeinkunna fyrir eiginleika hjá gripum fæddum eftir 2006', fontsize = 20)
 
 # saman[[
 #     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3', 'BLUP_ICF',
@@ -133,8 +159,8 @@ plt.title('Fylgni á milli kynbótaeinkunna fyrir eiginleika hjá gripum fæddum
 
 
 #Print info and a part of the dataset
-print(saman2006.iloc[450000:450030])
-print(saman2006.info())
+print(saman.iloc[450000:450030])
+print(saman.info())
 
 
 
@@ -171,8 +197,102 @@ print(saman2006.info())
 # plt.plot((saman2001.groupby('BY')['frjosemi'].mean()), label='frjosemi', color='red')
 
 
+fig, ax1 = plt.subplots()
+ax1.set_xlim(2006, 2020)
+
+# plt.set_style.use('seaborn')
+# plt.sns.set_style("dark")
+
+ax1.plot(
+    (saman.groupby('BY')['CR0_I'].mean()),
+    label='CR_I',
+    color='slategrey',
+    linestyle=':',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['CR0_P'].mean()),
+    label='CR_P',
+    color='black',
+    linestyle=':',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['ICF_I'].mean()),
+    label='ICF_I',
+    color='mediumslateblue',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['ICF_P'].mean()),
+    label='ICF_P',
+    color='blue',
+    #linestyle='--',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['IFL_I'].mean()),
+    label='IFL_I',
+    color='aquamarine',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['IFL_P'].mean()),
+    label='IFL_P',
+    color='green',
+    #linestyle='--',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['CI_I'].mean()),
+    label='CI_I',
+    color='yellow',
+    linestyle='--',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['new_I'].mean()),
+    label='new_I',
+    color='orchid',
+    linestyle='-.',
+    linewidth=3)
 
 
+ax1.plot(
+    (saman.groupby('BY')['new_P'].mean()),
+    label='new_P',
+    color='deeppink',
+    linestyle='-.',
+    linewidth=3)
+
+
+
+ax2 = ax1.twinx()
+
+ax2.plot(
+    (saman.groupby('BY')['frjosemi'].mean()),
+    label='frjosemi',
+    color='red',
+    linewidth=3)
+
+#Show legends of plotted values, names are in 'label' above
+ax1.legend()
+ax2.legend()
+
+#Labels for x and y
+ax1.set_xlabel('Birth Year' , fontsize = 15)
+ax1.set_ylabel('EBV from DMU5, standardized', fontsize = 15)
+ax2.set_ylabel('EBV from old kynbótamat', fontsize = 15)
+#Title of plot
+ax1.set_title('Average estimated breeding values by birth year for cows with \
+their observation for new fertility traits', fontsize = 20)
+
+
+
+
+
+
+#Gamalt:
 # #Labels for x and y
 # plt.xlabel('Birth Year')
 # plt.ylabel('EBV')

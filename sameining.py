@@ -32,9 +32,24 @@ phantom = pd.read_csv(
         'BLUP_IFL1_P','BLUP_IFL2_P','BLUP_IFL3_P']
     )
 
+#CI results
+CI = pd.read_csv(
+    "../data/saman_ci.txt",
+    header=None,
+    sep=' ',
+    names=['id',
+        'CI12','CI23','CI34']
+    )
+
+
 #Inbreeding results and phantom group results together in a file
 saman_allt = pd.merge(left=inbreed, right=phantom, on='id')
+#Inbreeding results and phantom group results together in a file
+saman_allt = pd.merge(left=saman_allt, right=CI, on='id')
 #Old results merged
 saman_allt = pd.merge(left=saman_allt, right=gamla, on='id')
 #Written into a datafile
 saman_allt.to_csv("../data/saman_I_P_G.txt", index=False, header=False, sep=' ')
+
+print(saman_allt.iloc[600000:600015])
+print(saman_allt.info())

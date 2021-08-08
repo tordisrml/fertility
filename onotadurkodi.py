@@ -177,3 +177,37 @@ dmu_fertility[['birth','calv1','calv2','calv3']] = dmu_fertility[
     ['birth','calv1','calv2','calv3']
     ].apply(
     lambda x: pd.to_datetime(x, format='%Y-%m-%d'))
+
+
+
+
+fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, sharex=True)
+
+ax1.plot(
+    (saman.groupby('BY')['ICF_I'].mean()),
+    label='ICF_I',
+    color='mediumslateblue',
+    linewidth=3)
+
+ax1.plot(
+    (saman.groupby('BY')['ICF_P'].mean()),
+    label='ICF_P',
+    color='blue',
+    linestyle='--',
+    linewidth=3)
+
+ax2 = ax1.twinx()
+
+ax2.plot(
+    (saman.groupby('BY')['frjosemi'].mean()),
+    label='frjosemi',
+    color='red')
+
+#Show legends of plotted values, names are in 'label' above
+ax1.legend()
+
+#Labels for x and y
+ax2.set_xlabel('Birth Year')
+ax1.set_ylabel('EBV')
+#Title of plot
+ax1.set_title('Estimated breeding values for ICF and IFL by Birth year')
