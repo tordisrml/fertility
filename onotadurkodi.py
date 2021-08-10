@@ -211,3 +211,68 @@ ax2.set_xlabel('Birth Year')
 ax1.set_ylabel('EBV')
 #Title of plot
 ax1.set_title('Estimated breeding values for ICF and IFL by Birth year')
+
+#Style of plot
+#plt.style.use('Solarize_Light2')
+#Print to see avalable styles
+# print(plt.style.available) mediumslateblue
+
+# plt.plot((saman2001.groupby('BY')['ICF1_I'].mean()), label='ICF1_I', color='mediumslateblue')
+# plt.plot((saman2001.groupby('BY')['ICF2_I'].mean()), label='ICF2_I', color='royalblue' )
+# plt.plot((saman2001.groupby('BY')['ICF3_I'].mean()), label='ICF3_I', color='navy')
+# plt.plot((saman2001.groupby('BY')['ICF1_P'].mean()), label='ICF1_P', color='cornflowerblue')
+# plt.plot((saman2001.groupby('BY')['ICF2_P'].mean()), label='ICF2_P', color='mediumblue')
+# # plt.plot((saman2001.groupby('BY')['ICF3_P'].mean()), label='ICF3_P', color='slateblue')
+# plt.plot((saman2001.groupby('BY')['ICF_I'].mean()), label='ICF_I', color='mediumslateblue', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['ICF_P'].mean()), label='ICF_P', color='blue', linewidth=4)
+#
+# # plt.plot((saman2001.groupby('BY')['IFL1_I'].mean()), label='IFL1_I', color='green')
+# # plt.plot((saman2001.groupby('BY')['IFL2_I'].mean()), label='IFL2_I', color='forestgreen')
+# # plt.plot((saman2001.groupby('BY')['IFL3_I'].mean()), label='IFL3_I', color='mediumseagreen')
+# # plt.plot((saman2001.groupby('BY')['IFL1_P'].mean()), label='IFL1_P', color='springgreen')
+# # plt.plot((saman2001.groupby('BY')['IFL2_P'].mean()), label='IFL2_P', color='aquamarine')
+# # plt.plot((saman2001.groupby('BY')['IFL3_P'].mean()), label='IFL3_P', color='seagreen')
+# plt.plot((saman2001.groupby('BY')['IFL_I'].mean()), label='IFL_I', color='lime', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['IFL_P'].mean()), label='IFL_P', color='limegreen', linewidth=4)
+#
+# plt.plot((saman2001.groupby('BY')['CR0_I'].mean()), label='CR0_I', color='slategrey', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['CR0_P'].mean()), label='CR0_P', color='black', linewidth=4)
+#
+# plt.plot((saman2001.groupby('BY')['new_I'].mean()), label='new_I', color='orchid', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['new_P'].mean()), label='new_P', color='deeppink', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['CI_I'].mean()), label='CI_I', color='yellow', linewidth=4)
+# plt.plot((saman2001.groupby('BY')['frjosemi'].mean()), label='frjosemi', color='red')
+
+
+saman[[
+    'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3', 'BLUP_ICF',
+    'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3', 'BLUP_IFL',
+    'fertility_1','fertility_2','fertility_3','frjosemi']] = saman[[
+    'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3', 'BLUP_ICF',
+    'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3', 'BLUP_IFL',
+    'fertility_1','fertility_2','fertility_3','frjosemi']].astype(float).round().astype(int)
+
+Print Summary statistics
+print(saman[[
+    'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3',
+    'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3',
+    'fertility_1','fertility_2','fertility_3','frjosemi']].describe())
+
+# print(sires50.groupby("BY").describe())
+
+describe = sires50.groupby("BY").describe().to_csv("my_description.csv")
+
+
+# saman[[
+#     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3', 'BLUP_ICF',
+#     'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3', 'BLUP_IFL',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']] = saman[[
+#     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3', 'BLUP_ICF',
+#     'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3', 'BLUP_IFL',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']].astype(float).round().astype(int)
+
+#Print Summary statistics
+# print(saman[[
+#     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3',
+#     'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']].describe())    

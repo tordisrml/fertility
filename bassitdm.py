@@ -61,9 +61,8 @@ df = pd.read_fwf(
     ]
     )
 
-
+#Locate fertilty breeding results and put in a seperate file
 fertilty = df.loc[:, ['id','fertility_1','fertility_2','fertility_3','frjosemi']]
-
 fertilty.to_csv("../data/gamla_mat.txt", index=False, header=False, sep=' ')
 
 print(df.iloc[50000:50015])

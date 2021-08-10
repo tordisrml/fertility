@@ -1,9 +1,9 @@
-#Program to check which animals have their own observations in SOL files
-#Also checks bulls with daughters with their own obs
+#Program to locate bulls that have a certain number of daughters in ped files
+#Thordis Thorarinsdottir 2021
 import pandas as pd
 import numpy as np
 from collections import Counter
-
+#-------------------------------------------------------------------
 #Reading in id codes to replace in SOL files
 code_df = pd.read_csv(
     "../data/id_code.txt",
@@ -11,7 +11,7 @@ code_df = pd.read_csv(
     sep = ' ',
     names=['id','code_id']
     )
-
+#-------------------------------------------------------------------
 #Reading in DMU observation file
 df = pd.read_csv(
     "../data/dmu_fertility.txt",
@@ -21,7 +21,7 @@ df = pd.read_csv(
         'IYM3','AGEi_h','AGEc_1','AGEc_2','AGEc_3','tech_h',
         'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']
     )
-
+#-------------------------------------------------------------------
 #Reading pedigree
 ped = pd.read_csv(
     "../data/dmu_ped.ped",
@@ -29,6 +29,7 @@ ped = pd.read_csv(
     sep = ' ',
     names=['id','dam','sire']
     )
+#-------------------------------------------------------------------
 
 #Merging code id file and dataframe
 df= pd.merge(left=df[
