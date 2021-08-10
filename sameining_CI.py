@@ -1,7 +1,5 @@
-#This is a program that takes DMU5 test files and collects in one file along
-#with BLUP from old ferility breeding evaluation to be compared.
-#Takes files from CR0_ICF_IFL_inbreed or
-#From CR0_ICF_IFL_phantom
+#This is a program that takes DMU5 SOL file from calving interval
+#test run and creates a file for BLUP results
 
 import pandas as pd
 import numpy as np

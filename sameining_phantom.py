@@ -1,7 +1,6 @@
-#This is a program that takes DMU5 test files and collects in one file along
-#with BLUP from old ferility breeding evaluation to be compared.
-#Takes files from CR0_ICF_IFL_inbreed or
-#From CR0_ICF_IFL_phantom
+#This is a program that takes DMU5 SOL file from the 7 trait phantom group
+#test run and creates a new file for BLUP results
+#Thordis Thorarinsdottir 2021
 
 import pandas as pd
 import numpy as np
@@ -14,9 +13,8 @@ id_code = pd.read_csv(
     names=['id','code_id']
     )
 
-
 #-------------------------------------------------------------
-#CR0_ICF_IFL_inbreed
+#CR0_ICF_IFL_phantom
 #-------------------------------------------------------------
 #Reading in sol file
 widths = [1,3,3,4,12,12,12,20,20]
@@ -63,16 +61,19 @@ ifl_sol3['BLUP_IFL3'] = ifl_sol3['8_BLUP']
 saman_phantom= pd.merge(left=cr_sol[
     ['id', 'BLUP_CR0']
     ], right=icf_sol1[['id','BLUP_ICF1']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=icf_sol2[['id','BLUP_ICF2']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=icf_sol3[['id','BLUP_ICF3']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol1[['id','BLUP_IFL1']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol2[['id','BLUP_IFL2']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol3[['id','BLUP_IFL3']], on='id')
+saman_phantom= pd.merge(left=saman_phantom, right=icf_sol2[['id','BLUP_ICF2']
+    ], on='id')
+saman_phantom= pd.merge(left=saman_phantom, right=icf_sol3[['id','BLUP_ICF3']
+    ], on='id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol1[['id','BLUP_IFL1']
+    ], on='id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol2[['id','BLUP_IFL2']
+    ], on='id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol3[['id','BLUP_IFL3']
+    ], on='id')
 
 #Creating a file with new results
 saman_phantom.to_csv("../data/saman_phantom.txt", index=False, header=False, sep=' ')
-
-
 
 print(saman_phantom.iloc[600000:600015])
 print(saman_phantom.info())

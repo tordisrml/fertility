@@ -1,5 +1,5 @@
-#This program takes SOL results from inbreeding DMU5 and phantom group
-#DMU5 and combines results together in a file along with old BLUP results
+#This program takes result files from DMU5 test runs and
+#combines results together in a big file along with old BLUP results
 
 import pandas as pd
 import numpy as np
@@ -40,7 +40,6 @@ CI = pd.read_csv(
     names=['id',
         'CI12','CI23','CI34']
     )
-
 
 #Inbreeding results and phantom group results together in a file
 saman_allt = pd.merge(left=inbreed, right=phantom, on='id')

@@ -275,4 +275,4 @@ describe = sires50.groupby("BY").describe().to_csv("my_description.csv")
 # print(saman[[
 #     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3',
 #     'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3',
-#     'fertility_1','fertility_2','fertility_3','frjosemi']].describe())    
+#     'fertility_1','fertility_2','fertility_3','frjosemi']].describe())

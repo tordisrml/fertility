@@ -39,26 +39,27 @@ df= pd.merge(left=df[
 #Merging pedigree with df
 df= pd.merge(left=df, right=ped[['id','sire']], on='id', how='left')
 
-
+#Counting the number of offpsring per sire
 df['sire_count'] = df.groupby('sire')['sire'].transform('count')
 
+#Locating sires that have more than 50 daughters
 sires = df[(
     df['sire_count'] > 50) & (df['sire'] > 0)
 ]
 
 sires['sire_count'] = sires.groupby('sire')['sire'].transform('count')
 
+#Creating a file with sires that have more than 50 daughters
 sires = sires[['sire', 'sire_count']]
 sires = sires.sort_values(by=['sire'])
+#Delete duplicates
 sires = sires.drop_duplicates(subset=['sire'])
 sires.to_csv("../data/sire_50.txt", index=False, header=False, sep=' ')
 
-#
 
-# print(df.info())
 # print(sires.iloc[30000:30015])
 print(sires.info())
-#
+#This print the values of the sire_count variable in the terminal
 # print('sire')
 # print(Counter(sires['sire_count']).keys()) # equals to list(set(words))
 # print(Counter(sires['sire_count']).values()) # counts the elements' frequency
