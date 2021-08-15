@@ -276,3 +276,163 @@ describe = sires50.groupby("BY").describe().to_csv("my_description.csv")
 #     'BLUP_ICF1','BLUP_ICF2','BLUP_ICF3',
 #     'BLUP_IFL1','BLUP_IFL2','BLUP_IFL3',
 #     'fertility_1','fertility_2','fertility_3','frjosemi']].describe())
+
+
+
+# saman['CR0_I'] = 100+((saman['CR0_I']-saman['CR0_I'].mean())/saman['CR0_I'].std())*10
+# saman['ICF1_I'] = 100+((saman['ICF1_I']-saman['ICF1_I'].mean())/saman['ICF1_I'].std())*-10
+# saman['ICF2_I'] = 100+((saman['ICF2_I']-saman['ICF2_I'].mean())/saman['ICF2_I'].std())*-10
+# saman['ICF3_I'] = 100+((saman['ICF3_I']-saman['ICF3_I'].mean())/saman['ICF3_I'].std())*-10
+# saman['IFL1_I'] = 100+((saman['IFL1_I']-saman['IFL1_I'].mean())/saman['IFL1_I'].std())*-10
+# saman['IFL2_I'] = 100+((saman['IFL2_I']-saman['IFL2_I'].mean())/saman['IFL2_I'].std())*-10
+# saman['IFL3_I'] = 100+((saman['IFL3_I']-saman['IFL3_I'].mean())/saman['IFL3_I'].std())*-10
+# saman['CI12_I'] = 100+((saman['CI12_I']-saman['CI12_I'].mean())/saman['CI12_I'].std())*-10
+# saman['CI23_I'] = 100+((saman['CI23_I']-saman['CI23_I'].mean())/saman['CI23_I'].std())*-10
+# saman['CI34_I'] = 100+((saman['CI34_I']-saman['CI34_I'].mean())/saman['CI34_I'].std())*-10
+# saman['CR0_P'] = 100+((saman['CR0_P']-saman['CR0_P'].mean())/saman['CR0_P'].std())*10
+# saman['ICF1_P'] = 100+((saman['ICF1_P']-saman['ICF1_P'].mean())/saman['ICF1_P'].std())*-10
+# saman['ICF2_P'] = 100+((saman['ICF2_P']-saman['ICF2_P'].mean())/saman['ICF2_P'].std())*-10
+# saman['ICF3_P'] = 100+((saman['ICF3_P']-saman['ICF3_P'].mean())/saman['ICF3_P'].std())*-10
+# saman['IFL1_P'] = 100+((saman['IFL1_P']-saman['IFL1_P'].mean())/saman['IFL1_P'].std())*-10
+# saman['IFL2_P'] = 100+((saman['IFL2_P']-saman['IFL2_P'].mean())/saman['IFL2_P'].std())*-10
+# saman['IFL3_P'] = 100+((saman['IFL3_P']-saman['IFL3_P'].mean())/saman['IFL3_P'].std())*-10
+
+
+# #------------------------------------------------------------------------------
+# #Standardize the results with genetic SD
+# #Multiplied by -1 to so improvements are posative
+# saman['CR0_I'] = (saman['CR0_I'] / CR0_SD)
+# saman['ICF1_I'] = (saman['ICF1_I'] / ICF1_SD)*(-1)
+# saman['ICF2_I'] = (saman['ICF2_I'] / ICF2_SD)*(-1)
+# saman['ICF3_I'] = (saman['ICF3_I'] / ICF3_SD)*(-1)
+# saman['IFL1_I'] = (saman['IFL1_I'] / IFL1_SD)*(-1)
+# saman['IFL2_I'] = (saman['IFL2_I'] / IFL2_SD)*(-1)
+# saman['IFL3_I'] = (saman['IFL3_I'] / IFL3_SD)*(-1)
+# saman['CR0_P'] = (saman['CR0_P'] / CR0_SD)
+# saman['ICF1_P'] = (saman['ICF1_P'] / ICF1_SD)*(-1)
+# saman['ICF2_P'] = (saman['ICF2_P'] / ICF2_SD)*(-1)
+# saman['ICF3_P'] = (saman['ICF3_P'] / ICF3_SD)*(-1)
+# saman['IFL1_P'] = (saman['IFL1_P'] / IFL1_SD)*(-1)
+# saman['IFL2_P'] = (saman['IFL2_P'] / IFL2_SD)*(-1)
+# saman['IFL3_P'] = (saman['IFL3_P'] / IFL3_SD)*(-1)
+# saman['CI12_I'] = (saman['CI12_I'] / CI12_SD)*(-1)
+# saman['CI23_I'] = (saman['CI23_I'] / CI23_SD)*(-1)
+# saman['CI34_I'] = (saman['CI34_I'] / CI34_SD)*(-1)
+# #------------------------------------------------------------------------------
+
+
+
+print(CR0_SD_I)
+print(ICF1_SD_I)
+print(ICF2_SD_I)
+print(ICF3_SD_I)
+print(IFL1_SD_I)
+print(IFL2_SD_I)
+print(IFL3_SD_I)
+print(CI12_SD_I)
+
+
+# #Genetic SD from DMUAI runs (from MCs project)
+# CR0_SD = 0.059823333
+# ICF1_SD = 6.13866
+# ICF2_SD = 7.58765
+# ICF3_SD = 5.67486
+# IFL1_SD = 6.59772
+# IFL2_SD = 5.30567
+# IFL3_SD = 6.57391
+# CI12_SD = 8.79335
+# CI23_SD = 8.95628
+# CI34_SD = 6.11366
+
+#Genetic SD from DMUAI runs (from Þórdís's MCs project )
+CR0_SD = 0.059823333
+ICF1_SD = 6.13866
+ICF2_SD = 7.58765
+ICF3_SD = 5.67486
+IFL1_SD = 6.59772
+IFL2_SD = 5.30567
+IFL3_SD = 6.57391
+CI12_SD = 8.79335
+CI23_SD = 8.95628
+CI34_SD = 6.11366
+#------------------------------------------------------------------------------
+#Standardize the results with genetic SD
+#Multiplied by -1 to so improvements are posative
+saman['CR0_I'] = (saman['CR0_I'] / CR0_SD)
+saman['ICF1_I'] = (saman['ICF1_I'] / ICF1_SD)*(-1)
+saman['ICF2_I'] = (saman['ICF2_I'] / ICF2_SD)*(-1)
+saman['ICF3_I'] = (saman['ICF3_I'] / ICF3_SD)*(-1)
+saman['IFL1_I'] = (saman['IFL1_I'] / IFL1_SD)*(-1)
+saman['IFL2_I'] = (saman['IFL2_I'] / IFL2_SD)*(-1)
+saman['IFL3_I'] = (saman['IFL3_I'] / IFL3_SD)*(-1)
+saman['CR0_P'] = (saman['CR0_P'] / CR0_SD)
+saman['ICF1_P'] = (saman['ICF1_P'] / ICF1_SD)*(-1)
+saman['ICF2_P'] = (saman['ICF2_P'] / ICF2_SD)*(-1)
+saman['ICF3_P'] = (saman['ICF3_P'] / ICF3_SD)*(-1)
+saman['IFL1_P'] = (saman['IFL1_P'] / IFL1_SD)*(-1)
+saman['IFL2_P'] = (saman['IFL2_P'] / IFL2_SD)*(-1)
+saman['IFL3_P'] = (saman['IFL3_P'] / IFL3_SD)*(-1)
+saman['CI12_I'] = (saman['CI12_I'] / CI12_SD)*(-1)
+saman['CI23_I'] = (saman['CI23_I'] / CI23_SD)*(-1)
+saman['CI34_I'] = (saman['CI34_I'] / CI34_SD)*(-1)
+
+#Creating fixed effect Herd - Birth year / Calving years
+s = cows_df['herd'] * 100
+#herd - birth year
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['birth'].notnull().astype(int) == 1),
+'H_BY'] = (s + cows_df['birth'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 1
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv1'].notnull().astype(int) == 1),
+'HC1'] = (s + cows_df['calv1'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 2
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 1),
+'HC2'] = (s + cows_df['calv2'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#herd - calving year 3
+cows_df.loc[
+(cows_df['herd'].notnull().astype(int) == 1) &
+(cows_df['calv3'].notnull().astype(int) == 1),
+'HC3'] = (s + cows_df['calv3'].dt.strftime('%y').replace('NaT', '0').astype(int))
+#Filling emty cells with 0 and setting as integers
+cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
+    ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
+
+
+#THIS PART IS STILL UNDEVELOPED. NO HERD YEAR CLEANING ARE CURRENTLY DONE
+#Counting number of cows per Herd-year class
+# data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
+# data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
+# data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
+# data_use['HC3_c'] = data_use.groupby('HC3')['HC3'].transform('count')
+# #Locate and mark cows that are alone in herd year class
+# data_use.loc[
+# (data_use['H_BY_c'] == 1) |
+# (data_use['HC1_c'] == 1) |
+# (data_use['HC2_c'] == 1) |
+# (data_use['HC3_c'] == 1)
+# ,'check2'] = 1
+# #Only use cows that are not alone in herd-year class
+# data_use2 = data_use[(
+#     data_use['check2'].notnull().astype(int) == 0)
+# ]
+
+# #Checks again on herd-year classes
+# data_use2['H_BY_c'] = data_use2.groupby('H_BY')['H_BY'].transform('count')
+# data_use2['HC1_c'] = data_use2.groupby('HC1')['HC1'].transform('count')
+# data_use2['HC2_c'] = data_use2.groupby('HC2')['HC2'].transform('count')
+# data_use2['HC3_c'] = data_use2.groupby('HC3')['HC3'].transform('count')
+# data_use2.loc[
+# (data_use2['H_BY_c'] == 1) |
+# (data_use2['HC1_c'] == 1) |
+# (data_use2['HC2_c'] == 1) |
+# (data_use2['HC3_c'] == 1)
+# ,'check3'] = 1
+# #Observations that DON'T fulfill every condition are collected
+# data_use3 = data_use2[(
+#     data_use2['check3'].notnull().astype(int) == 0)
+# ]

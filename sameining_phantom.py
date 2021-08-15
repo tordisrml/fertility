@@ -19,7 +19,7 @@ id_code = pd.read_csv(
 #Reading in sol file
 widths = [1,3,3,4,12,12,12,20,20]
 sol = pd.read_fwf(
-    "/home/thordis/DMUtests/CR0_ICF_IFL_phantom/SOL",
+    "/home/thordis/DMUtests/CR0_ICF_IFL_phantom_2001/SOL",
     header=None,
     widths=widths,
     names=['1_code_effect', #2 for fixed and 4 for genetic
@@ -73,7 +73,7 @@ saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol3[['id','BLUP_IFL3']
     ], on='id')
 
 #Creating a file with new results
-saman_phantom.to_csv("../data/saman_phantom.txt", index=False, header=False, sep=' ')
+saman_phantom.to_csv("../data/saman_phantom_2001.txt", index=False, header=False, sep=' ')
 
 print(saman_phantom.iloc[600000:600015])
 print(saman_phantom.info())

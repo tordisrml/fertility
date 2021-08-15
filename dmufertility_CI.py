@@ -478,32 +478,7 @@ cows_df.loc[
 # #---------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------
-#Creating fixed effect Herd - Birth year / Calving years
-s = cows_df['herd'] * 100
-#herd - birth year
-cows_df.loc[
-(cows_df['herd'].notnull().astype(int) == 1) &
-(cows_df['birth'].notnull().astype(int) == 1),
-'H_BY'] = (s + cows_df['birth'].dt.strftime('%y').replace('NaT', '0').astype(int))
-#herd - calving year 1
-cows_df.loc[
-(cows_df['herd'].notnull().astype(int) == 1) &
-(cows_df['calv1'].notnull().astype(int) == 1),
-'HC1'] = (s + cows_df['calv1'].dt.strftime('%y').replace('NaT', '0').astype(int))
-#herd - calving year 2
-cows_df.loc[
-(cows_df['herd'].notnull().astype(int) == 1) &
-(cows_df['calv2'].notnull().astype(int) == 1),
-'HC2'] = (s + cows_df['calv2'].dt.strftime('%y').replace('NaT', '0').astype(int))
-#herd - calving year 3
-cows_df.loc[
-(cows_df['herd'].notnull().astype(int) == 1) &
-(cows_df['calv3'].notnull().astype(int) == 1),
-'HC3'] = (s + cows_df['calv3'].dt.strftime('%y').replace('NaT', '0').astype(int))
-#Filling emty cells with 0 and setting as integers
-cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
-    ['H_BY','HC1','HC2','HC3']].fillna(0, downcast='infer')
-#---------------------------------------------------------------------------
+
 #Creating first Insemanation year - month fixed effect
 cows_df[['CM1','CM2','CM3']] = cows_df[
     ['calv1','calv2','calv3']
@@ -535,56 +510,112 @@ data_use = cows_df[(
 ]
 
 
-# #Observations that DON'T fulfill every condition are collected
-# data_not_used = cows_df[(
-#     cows_df['herd'].notnull().astype(int) == 0) | (  #herd missing
-#     cows_df['birth'].notnull().astype(int) == 0) | ( #no birth year
-#     cows_df['wrong'].notnull().astype(int) == 1) | ( #AFC or AFI wrong
-#     cows_df['wrong1'].notnull().astype(int) == 1) | ( #first lact wrong
-#     cows_df['wrong2'].notnull().astype(int) == 1) | ( #second lact wrong
-#     cows_df['wrong3'].notnull().astype(int) == 1) | ( #third lact wrong
-#     cows_df['ins_lact'] == 99.0) | (  #ins did not register on a lactation
-#     cows_df['ins_lact'] == 88.0) & ( #ins happens before 2008
-#     cows_df['ins_lact'] == 77.0) & ( #ins has a comment
-#     cows_df['no_calv'] == 9.0) & (  #Order of calving not correct
-#     cows_df['check'].notnull().astype(int) == 0)
-# ]
-#data_not_used.to_excel("../data/data_not_used.xlsx", index=False)
+#This is a function to create herd x year group fixed effect
+def hy_grouping(df, col, group, df1):
+    tdf = []
+    for herd, data in df.groupby( 'herd' ):
+        # get counts and assign initial groups
+        counts = data[ col ].value_counts().sort_index().to_frame()
+        counts[ 'group' ] = range( counts.shape[ 0 ] )
+
+        while True:
+            gcounts = counts.groupby( 'group' ).sum()[ col ]  # group counts
+            change = gcounts[ gcounts.values < 3 ]  # groups with too few
+
+            if change.shape[ 0 ] == 0:
+                # no changes, exit
+                break
+
+            # check how to merge groups
+            cgroup = change.index.min()
+            groups = gcounts.index.values
+            g_ind = list( groups ).index( cgroup )
+            if ( g_ind + 1 ) < groups.shape[ 0 ]:
+                # merge forward
+                ngroup = groups[ g_ind + 1 ]
+
+            elif g_ind > 0:
+                # merge backward
+                ngroup = groups[ g_ind - 1 ]
+
+            else:
+                # no groups to merge
+                print( f'Can not merge herd {herd}' )
+                break
+
+            counts.loc[ counts[ 'group' ] == cgroup, 'group' ] = ngroup
+
+        # assign groups
+        for ind, gdata in counts.iterrows():
+            data.loc[ data[ col ] == ind, 'group' ] = gdata[ 'group' ]
+
+        tdf.append( data )
+
+    tdf = pd.concat( tdf )
+
+    tdf[ group ] = tdf[ 'herd' ].astype( 'str' ) + tdf[ 'group' ].astype( int ).astype( str )
+
+    df1 = pd.merge(left=df1, right=tdf[['id', group]], on='id',
+        how='outer').fillna(0, downcast='infer')
+
+    return df1
+
+#Creating year columns
+data_use[['BY','C1','C2','C3']] = data_use[
+    ['birth','calv1','calv2','calv3']
+    ].apply(
+    lambda s: s.dt.strftime('%Y'))
+
+#Create a dataframe to group
+herd_by = data_use[['id','herd','birth','BY']].copy()
+herd_c1 = data_use[['id','herd','calv1','C1']].copy()
+herd_c2 = data_use[['id','herd','calv2','C2']].copy()
+herd_c3 = data_use[['id','herd','calv3','C3']].copy()
+ids = data_use['id'].copy()
+
+herd_by = herd_by.loc[(herd_by['herd'].notnull().astype(int) == 1) &
+    (herd_by['birth'].notnull().astype(int) == 1)]
+herd_c1 = herd_c1.loc[(herd_c1['herd'].notnull().astype(int) == 1) &
+    (herd_c1['calv1'].notnull().astype(int) == 1)]
+herd_c2 = herd_c2.loc[(herd_c2['herd'].notnull().astype(int) == 1) &
+    (herd_c2['calv2'].notnull().astype(int) == 1)]
+herd_c3 = herd_c3.loc[(herd_c3['herd'].notnull().astype(int) == 1) &
+    (herd_c3['calv3'].notnull().astype(int) == 1)]
+
+herd_by = herd_by.sort_values(by=['herd','birth'])
+herd_c1 = herd_c1.sort_values(by=['herd','calv1'])
+herd_c2 = herd_c2.sort_values(by=['herd','calv2'])
+herd_c3 = herd_c3.sort_values(by=['herd','calv3'])
+
+print( f'Starting with herd x birth year' )
+ids = hy_grouping(herd_by, 'BY', 'HBY', ids)
+
+print( f'Starting with herd x calving year 1' )
+ids = hy_grouping(herd_c1, 'C1', 'HC1', ids)
+
+print( f'Starting with herd x calving year 2' )
+ids = hy_grouping(herd_c2, 'C2', 'HC2', ids)
+
+print( f'Starting with herd x calving year 3' )
+ids = hy_grouping(herd_c3, 'C3', 'HC3', ids)
+
+data_use = pd.merge(left=data_use, right=ids, on='id', how='left')
 
 
-#THIS PART IS STILL UNDEVELOPED. NO HERD YEAR CLEANING ARE CURRENTLY DONE
-#Counting number of cows per Herd-year class
-# data_use['H_BY_c'] = data_use.groupby('H_BY')['H_BY'].transform('count')
-# data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
-# data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
-# data_use['HC3_c'] = data_use.groupby('HC3')['HC3'].transform('count')
-# #Locate and mark cows that are alone in herd year class
-# data_use.loc[
-# (data_use['H_BY_c'] == 1) |
-# (data_use['HC1_c'] == 1) |
-# (data_use['HC2_c'] == 1) |
-# (data_use['HC3_c'] == 1)
-# ,'check2'] = 1
-# #Only use cows that are not alone in herd-year class
-# data_use2 = data_use[(
-#     data_use['check2'].notnull().astype(int) == 0)
-# ]
+data_use['HBY_c'] = data_use.groupby('HBY')['HBY'].transform('count')
+data_use['HC1_c'] = data_use.groupby('HC1')['HC1'].transform('count')
+data_use['HC2_c'] = data_use.groupby('HC2')['HC2'].transform('count')
+data_use['HC3_c'] = data_use.groupby('HC3')['HC3'].transform('count')
 
-# #Checks again on herd-year classes
-# data_use2['H_BY_c'] = data_use2.groupby('H_BY')['H_BY'].transform('count')
-# data_use2['HC1_c'] = data_use2.groupby('HC1')['HC1'].transform('count')
-# data_use2['HC2_c'] = data_use2.groupby('HC2')['HC2'].transform('count')
-# data_use2['HC3_c'] = data_use2.groupby('HC3')['HC3'].transform('count')
-# data_use2.loc[
-# (data_use2['H_BY_c'] == 1) |
-# (data_use2['HC1_c'] == 1) |
-# (data_use2['HC2_c'] == 1) |
-# (data_use2['HC3_c'] == 1)
-# ,'check3'] = 1
-# #Observations that DON'T fulfill every condition are collected
-# data_use3 = data_use2[(
-#     data_use2['check3'].notnull().astype(int) == 0)
-# ]
+
+
+data_use = data_use[
+    (data_use['HBY_c'] != 1) &
+    (data_use['HC1_c'] != 1) &
+    (data_use['HC2_c'] != 1) &
+    (data_use['HC3_c'] != 1)
+]
+
 
 #Filling in missin values for DMU, -999.0 for reals
 #Real columns
@@ -608,7 +639,7 @@ data_use = pd.merge(left=data_use, right=code_df, on='id', how='left')
 #---------------------------------------------------------------------------
 data_use = data_use.sort_values(by=['code_id'])
 #Creating the DMU datafile
-dmu_fertility = data_use[['code_id','H_BY','HC1','HC2','HC3', 'CM1','CM2','CM3',
+dmu_fertility = data_use[['code_id','HBY','HC1','HC2','HC3', 'CM1','CM2','CM3',
     'AGEc_1','AGEc_2','AGEc_3',
     'CI12','CI23','CI34']].copy()
 #,'H_BY_c','HC1_c','HC2_c','HC3_c'
@@ -641,10 +672,11 @@ dmu_fertility.to_csv("../data/dmu_fertilityCI.txt", index=False, header=False, s
 
 
 #print(cows_df.iloc[50000:50015])
-print(dmu_fertility.iloc[50000:50015])
-print(cows_df.info())
+# print(dmu_fertility.iloc[50000:50015])
+# print(cows_df.info())
 print(data_use.info())
-print(data_not_used.info())
+print(data_use.iloc[50000:50015])
+# print(data_not_used.info())
 #print(cows_df.columns.tolist())
 #print(data_use['id'].nunique())
 #print(data_not_used['id'].nunique())
