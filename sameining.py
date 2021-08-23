@@ -15,7 +15,7 @@ gamla = pd.read_csv(
 
 #Inbreeding results
 inbreed = pd.read_csv(
-    "../data/saman_inbreed_2001.txt",
+    "../data/saman_inbreednew2.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -24,7 +24,7 @@ inbreed = pd.read_csv(
     )
 #Phantom group results
 phantom = pd.read_csv(
-    "../data/saman_phantom_2001.txt",
+    "../data/saman_phantomnew2.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -48,7 +48,7 @@ saman_allt = pd.merge(left=saman_allt, right=CI, on='id')
 #Old results merged
 saman_allt = pd.merge(left=saman_allt, right=gamla, on='id')
 #Written into a datafile
-saman_allt.to_csv("../data/saman_I_P_G_2001.txt", index=False, header=False, sep=' ')
+saman_allt.to_csv("../data/saman_I_P_G_new2.txt", index=False, header=False, sep=' ')
 
 print(saman_allt.iloc[600000:600015])
 print(saman_allt.info())

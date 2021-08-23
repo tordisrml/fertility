@@ -13,7 +13,7 @@ import seaborn
 #Read in file where results from inbreeding, phantom group and old breeding
 #value results are located.
 saman = pd.read_csv(
-    "../data/saman_I_P_G_2001.txt",
+    "../data/saman_I_P_G_new2.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -175,7 +175,7 @@ plt.title('Correlation between EBVs for animals that have their own observations
 #each birth year
 #This creates the figure and below it is possible to add another y-axis
 fig, ax1 = plt.subplots()
-ax1.set_xlim(2004, 2020)
+ax1.set_xlim(2006, 2020)
 
 #Does not work, no style is used
 # plt.set_style.use('seaborn')

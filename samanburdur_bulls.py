@@ -19,7 +19,7 @@ from scipy.stats import spearmanr
 #Read in file where results from inbreeding, phantom group and old breeding
 #value results are located.
 saman = pd.read_csv(
-    "../data/saman_I_P_G_2001.txt",
+    "../data/saman_I_P_G_new2.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -272,6 +272,6 @@ print(sires50.info())
 sires50 = sires50.astype(float).round().astype(int)
 
 # #Saves the dataframe to excel file
-sires50.to_excel("../data/sires50_100scale.xlsx", index=False, header=True)
+sires50.to_excel("../data/sires50_100scale20210822.xlsx", index=False, header=True)
 #
 # #plt.savefig('plot.png')

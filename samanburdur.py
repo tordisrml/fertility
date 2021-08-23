@@ -11,7 +11,7 @@ import seaborn
 #Read in file where results from inbreeding, phantom group and old breeding
 #value results are located.
 saman = pd.read_csv(
-    "../data/saman_I_P_G_2001.txt",
+    "../data/saman_I_P_G_new2.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -24,7 +24,7 @@ saman = pd.read_csv(
 #Make birth year from id number an integer
 saman['BY'] = (saman.id.astype(str).str[:4]).astype(int)
 #------------------------------------------------------------------------------
-ave_group = saman.loc[(saman['BY'] >= 2008) & (saman['BY'] <= 2018)]
+ave_group = saman.loc[(saman['BY'] >= 2017) & (saman['BY'] <= 2018)]
 
 CR0_SD_I = ave_group['CR0_I'].std()
 ICF1_SD_I = ave_group['ICF1_I'].std()
@@ -108,6 +108,12 @@ saman['new_P'] = (saman['CR0_P'] * 0.2 +
     saman['ICF_P'] * 0.3 +
     saman['IFL_P'] * 0.5 )
 #------------------------------------------------------------------------------
+
+# #Saves the dataframe to excel file
+# saman.to_csv("../data/allblup100.txt", index=False, header=False, sep=" ")
+print(saman.info())
+
+
 #Only plot animals born after a certain year
 #Create new dataframe
 saman2006 = saman[saman['BY'] > 2006]
@@ -220,7 +226,7 @@ ax1.set_xlabel('Birth Year' , fontsize = 15)
 ax1.set_ylabel('EBV from DMU5, standardized to 100', fontsize = 15)
 # ax2.set_ylabel('EBV from old kynbótamat', fontsize = 15)
 #Title of plot
-ax1.set_title('Average estimated breeding values by birth year for cows with \
+ax1.set_title('Average estimated breeding values by birth year for animals  \
 born after 2006', fontsize = 20)
 
 

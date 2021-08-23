@@ -436,3 +436,10 @@ cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
 # data_use3 = data_use2[(
 #     data_use2['check3'].notnull().astype(int) == 0)
 # ]
+
+
+#Creating first Insemanation year - month fixed effect
+# data_use[['IYM0','IYM1','IYM2','IYM3']] = data_use[
+#     ['first_h','first_1','first_2','first_3']
+#     ].apply(
+#     lambda s: s.dt.strftime('%Y%m').replace('NaT', '0').astype(int))
