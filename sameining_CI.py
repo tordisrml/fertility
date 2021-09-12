@@ -19,7 +19,7 @@ id_code = pd.read_csv(
 #Reading in sol file
 widths = [1,3,3,4,12,12,12,20,20]
 sol = pd.read_fwf(
-    "/home/thordis/DMUtests/CI_inbreed/SOL",
+    "/home/thordis/DMUtests/CI_phantom/SOL",
     header=None,
     widths=widths,
     names=['1_code_effect', #2 for fixed and 4 for genetic
@@ -34,7 +34,7 @@ sol = pd.read_fwf(
     ]
     )
 #Only keep genetic effectss
-sol = sol[sol['1_code_effect'] == 4 ]
+sol = sol[(sol['1_code_effect'] == 4) & (sol['code_id'] > 0)]
 #-------------------------------------------------------------
 #Merge the SOL and the id code file
 sol= pd.merge(left=sol[
@@ -58,7 +58,7 @@ saman_inbreed= pd.merge(left=saman_inbreed, right=CIsol3[['id','CI34']], on='id'
 
 
 #Creating a file with new results
-saman_inbreed.to_csv("../data/saman_ci.txt", index=False, header=False, sep=' ')
+saman_inbreed.to_csv("../data/saman_ci_P.txt", index=False, header=False, sep=' ')
 
 
 

@@ -62,8 +62,21 @@ df = pd.read_fwf(
     )
 
 #Locate fertilty breeding results and put in a seperate file
-fertilty = df.loc[:, ['id','fertility_1','fertility_2','fertility_3','frjosemi']]
-fertilty.to_csv("../data/gamla_mat.txt", index=False, header=False, sep=' ')
+# fertilty = df.loc[:, ['id','fertility_1','fertility_2','fertility_3','frjosemi']]
+# fertilty.to_csv("../data/gamla_mat.txt", index=False, header=False, sep=' ')
+heildareinkunn = df.loc[:, ['id','afurdamat', 'frjosemi', 'frumutala', 'jugur',
+    'spenar', 'mjaltir2', 'skap2', 'ending','heildareinkunn',]]
+heildareinkunn.to_csv("../data/heildareinkunn.txt", index=False, header=False, sep=' ')
 
-print(df.iloc[50000:50015])
-print(df.info())
+     #    tafla_ix(i,15)= tafla_ix(i,7)*0.36+   !afurdir
+     # +                  tafla_ix(i,8)*0.10+   !frjosemi
+     # +                  tafla_ix(i,9)*0.08+   !frumutala
+     # +                  tafla_ix(i,11)*0.10+  !jugur
+     # +                  tafla_ix(i,12)*0.10+  !spenar
+     # +                  tafla_ix(i,13)*0.08+  !mjaltir
+     # +                  tafla_ix(i,14)*0.08+  !skap
+     # +                  tafla_bv(i,52)*0.10   !ending
+
+
+print(heildareinkunn.iloc[50000:50015])
+print(heildareinkunn.info())

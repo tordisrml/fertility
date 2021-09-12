@@ -6,7 +6,8 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-import seaborn
+import seaborn as sns
+from scipy import stats
 
 #This is a program to compare old and new fertility evaluation.
 
@@ -55,8 +56,7 @@ ave_group = saman.loc[(saman['BY'] >= 2012) & (saman['BY'] <= 2017)]
 
 #Merging ownobs and id file to bring back einstaklingsnumer used in huppa
 ave_group = pd.merge(left=ownobs['id'], right=ave_group, on='id', how='left')
-print(ave_group.iloc[300:315])
-print(ave_group.info())
+
 
 CR0_SD_I = ave_group['CR0_I'].std()
 ICF1_SD_I = ave_group['ICF1_I'].std()
@@ -149,6 +149,11 @@ id_code = pd.read_csv(
     names=['id','code_id']
     )
 
+saman.loc[:,'BY_c'] = saman.groupby('BY')['BY'].transform('count')
+mean = saman.groupby('BY').mean()
+
+mean.to_excel("../data/regressionall.xlsx", index=True, header=True)
+
 #Merging ownobs and id file to bring back einstaklingsnumer used in huppa
 ownobs = pd.merge(left=ownobs[
     ['code_id']
@@ -158,119 +163,159 @@ ownobs = pd.merge(left=ownobs[
 saman = pd.merge(left=ownobs['id'], right=saman, on='id', how='left')
 
 
-#------------------------------------------------------------------------------
-#Correlation heat maps
-plt.figure(figsize=(8,8))
-seaborn.heatmap(saman[
-    ['CR0_I', 'CR0_P',
-    'ICF1_I','ICF2_I','ICF3_I',
-    'ICF1_P','ICF2_P','ICF3_P',
-    'IFL1_I','IFL2_I','IFL3_I',
-    'IFL1_P','IFL2_P','IFL3_P',
-    'CI12_I','CI23_I','CI34_I',
-    'fertility_1','fertility_2','fertility_3','frjosemi']
-    ].corr(), annot=True, cmap='coolwarm')
-plt.title('Correlation between EBVs for animals that have their own observations\
- for new fertility evaluation', fontsize = 20)
+# saman.loc[:,'BY_c'] = saman.groupby('BY')['BY'].transform('count')
+# mean = saman.groupby('BY').mean()
+#
+# mean.to_excel("../data/regression.xlsx", index=True, header=True)
 
-# Correlation heat map for all traits in dataframe!
-plt.figure(figsize=(8,8))
-seaborn.heatmap(saman[['CR0_I','CR0_P',
-    'ICF_I','ICF_P',
-    'IFL_I','IFL_P',
-    'new_I', 'new_P',
-    'CI_I',
-    'fertility_1','fertility_2','fertility_3','frjosemi']
-    ].corr(), annot=True, cmap='coolwarm')
-plt.title('Correlation between EBVs for animals that have their own observations\
- for new fertility evaluation', fontsize = 20)
-#------------------------------------------------------------------------------
+# get coeffs of linear fit
+slope, intercept, r_value, p_value, std_err = stats.linregress(mean.index,mean["frjosemi"])
 
-#------------------------------------------------------------------------------
-#Creation of a plot that shows the avarege breeding value for the traits for
-#each birth year
-#This creates the figure and below it is possible to add another y-axis
-fig, ax1 = plt.subplots()
-ax1.set_xlim(2006, 2018)
-ax1.set_ylim(80, 120)
+# use line_kws to set line label for legend
+ax = sns.regplot(x=mean.index, y=mean["ICF_P"], data=mean, color='b',
+ line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
 
-#Does not work, no style is used
-# plt.set_style.use('seaborn')
-# plt.sns.set_style("dark")
+# plot legend
+ax.legend()
 
-#EBVs from DMU5
-ax1.plot(
-    (saman.groupby('BY')['CR0_I'].mean()),
-    label='CR_I',
-    color='slategrey',
-    linestyle=':',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['CR0_P'].mean()),
-    label='CR_P',
-    color='black',
-    linestyle=':',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['ICF_I'].mean()),
-    label='ICF_I',
-    color='mediumslateblue',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['ICF_P'].mean()),
-    label='ICF_P',
-    color='blue',
-    #linestyle='--',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['IFL_I'].mean()),
-    label='IFL_I',
-    color='aquamarine',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['IFL_P'].mean()),
-    label='IFL_P',
-    color='green',
-    #linestyle='--',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['CI_I'].mean()),
-    label='CI_I',
-    color='yellow',
-    linestyle='--',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['new_I'].mean()),
-    label='new_I',
-    color='orchid',
-    linestyle='-.',
-    linewidth=3)
-ax1.plot(
-    (saman.groupby('BY')['new_P'].mean()),
-    label='new_P',
-    color='deeppink',
-    linestyle='-.',
-    linewidth=3)
-#Creation of another y-axis in the same figure
-# ax2 = ax1.twinx()
+print(r_value)
+print(p_value)
+print(std_err)
 
-ax1.plot(
-    (saman.groupby('BY')['frjosemi'].mean()),
-    label='frjosemi',
-    color='red',
-    linewidth=3)
+# print(mean.iloc[1:18])
+# print(mean.info())
+#
+# import statsmodels.api as sm
+#
+# X = mean.index
+# y = mean["frjosemi"]
+# X = sm.add_constant(X)
+#
+# # Note the difference in argument order
+# model = sm.OLS(y, X).fit()
+# predictions = model.predict(X) # make the predictions by the model
+#
+# # Print out the statistics
+# print(model.summary())
 
-#Show legends of plotted values, names are in 'label' above
-ax1.legend()
-# ax2.legend()
 
-#Labels for x and y
-ax1.set_xlabel('Birth Year' , fontsize = 15)
-ax1.set_ylabel('EBV from DMU5, standardized to 100 ', fontsize = 15)
-# ax2.set_ylabel('EBV from old kynbótamat', fontsize = 15)
-#Title of plot
-ax1.set_title('Average estimated breeding values by birth year for cows with \
-their observation for new fertility traits', fontsize = 20)
+
+
+# sns.regplot(x=mean.index, y=mean["IFL_P"], data=mean);
+
+# #------------------------------------------------------------------------------
+# #Correlation heat maps
+# plt.figure(figsize=(8,8))
+# seaborn.heatmap(saman[
+#     ['CR0_I', 'CR0_P',
+#     'ICF1_I','ICF2_I','ICF3_I',
+#     'ICF1_P','ICF2_P','ICF3_P',
+#     'IFL1_I','IFL2_I','IFL3_I',
+#     'IFL1_P','IFL2_P','IFL3_P',
+#     'CI12_I','CI23_I','CI34_I',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']
+#     ].corr(), annot=True, cmap='coolwarm')
+# plt.title('Correlation between EBVs for animals that have their own observations\
+#  for new fertility evaluation', fontsize = 20)
+#
+# # Correlation heat map for all traits in dataframe!
+# plt.figure(figsize=(8,8))
+# seaborn.heatmap(saman[['CR0_I','CR0_P',
+#     'ICF_I','ICF_P',
+#     'IFL_I','IFL_P',
+#     'new_I', 'new_P',
+#     'CI_I',
+#     'fertility_1','fertility_2','fertility_3','frjosemi']
+#     ].corr(), annot=True, cmap='coolwarm')
+# plt.title('Correlation between EBVs for animals that have their own observations\
+#  for new fertility evaluation', fontsize = 20)
+# #------------------------------------------------------------------------------
+#
+# #------------------------------------------------------------------------------
+# #Creation of a plot that shows the avarege breeding value for the traits for
+# #each birth year
+# #This creates the figure and below it is possible to add another y-axis
+# fig, ax1 = plt.subplots()
+# ax1.set_xlim(2006, 2018)
+# ax1.set_ylim(80, 120)
+#
+# #Does not work, no style is used
+# # plt.set_style.use('seaborn')
+# # plt.sns.set_style("dark")
+#
+# #EBVs from DMU5
+# ax1.plot(
+#     (saman.groupby('BY')['CR0_I'].mean()),
+#     label='CR_I',
+#     color='slategrey',
+#     linestyle=':',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['CR0_P'].mean()),
+#     label='CR_P',
+#     color='black',
+#     linestyle=':',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['ICF_I'].mean()),
+#     label='ICF_I',
+#     color='mediumslateblue',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['ICF_P'].mean()),
+#     label='ICF_P',
+#     color='blue',
+#     #linestyle='--',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['IFL_I'].mean()),
+#     label='IFL_I',
+#     color='aquamarine',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['IFL_P'].mean()),
+#     label='IFL_P',
+#     color='green',
+#     #linestyle='--',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['CI_I'].mean()),
+#     label='CI_I',
+#     color='yellow',
+#     linestyle='--',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['new_I'].mean()),
+#     label='new_I',
+#     color='orchid',
+#     linestyle='-.',
+#     linewidth=3)
+# ax1.plot(
+#     (saman.groupby('BY')['new_P'].mean()),
+#     label='new_P',
+#     color='deeppink',
+#     linestyle='-.',
+#     linewidth=3)
+# #Creation of another y-axis in the same figure
+# # ax2 = ax1.twinx()
+#
+# ax1.plot(
+#     (saman.groupby('BY')['frjosemi'].mean()),
+#     label='frjosemi',
+#     color='red',
+#     linewidth=3)
+#
+# #Show legends of plotted values, names are in 'label' above
+# ax1.legend()
+# # ax2.legend()
+#
+# #Labels for x and y
+# ax1.set_xlabel('Birth Year' , fontsize = 15)
+# ax1.set_ylabel('EBV from DMU5, standardized to 100 ', fontsize = 15)
+# # ax2.set_ylabel('EBV from old kynbótamat', fontsize = 15)
+# #Title of plot
+# ax1.set_title('Average estimated breeding values by birth year for cows with \
+# their observation for new fertility traits', fontsize = 20)
 
 #Show the plot in home computer via Xming
 plt.show()

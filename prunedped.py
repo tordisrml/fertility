@@ -1,83 +1,41 @@
-#Thordis Thorarinsdottir 2021!
-#This is a program that takes the pedigree file from Huppa, switches out
-#the Huppa ID numbers and creates a code number to be used in DMU runs
-
-#Input file "Pgree_?????????.txt" from Huppa
-#Output files: "id_code.txt" and "dmu_ped_code.ped"
-#New output, "dmu_ped_phantom.ped" where 0 parents are grouped into phantom groups
+#This program takes a pruned pedigree file and created a ped file for dmu
 
 import pandas as pd
 import numpy as np
 
-#Read the pedigree file that coms from huppa
-widths = [15,15,15,12,1,46]
-ped = pd.read_fwf(
-    "../data/Pgree_24jun2021.txt",
-    widths=widths,
+
+code = pd.read_csv(
+    "/home/thordis/data/id_code.txt",
     header=None,
-    names=['id','dam','sire','unused','sex','unused2']
+    sep = ' ',
+    names=['id','code_id']
     )
 
+widths = [15,16,16,]
+ped = pd.read_fwf(
+    '/home/thordis/data/5gen.ped',
+    widths=widths,
+    header=None,
+    names=['id','sire','dam']
+    )
 
-#Only 3 columns are needed
-# del ped[['unused','unused2']]
-ped = ped.drop(
-    ['unused','unused2'], axis = 1)
-
-ped = ped.sort_values(by=['id'])
-
-#For some reason there are some duplecate records, they need to be deleted
-ped = ped.drop_duplicates(subset=['id'])
-
-#The creation of code id's to be used in DMU
-ped['code_id'] = ped.index
-ped['code_id'] = ped['code_id'] + 1
-
-ped = ped.sort_values(by=['code_id'])
-
-#Creation of a file with animal numbers and matching code numbers
-code = ped[['id','code_id']].copy() #dataset with codenumbers for everyone
-code.to_csv('../data/id_code.txt', index=False, header=False, sep=' ')
-
-#Creation of a file with animal numbers and matching code numbers and sex
-code2 = ped[['id','code_id','sex']].copy() #dataset with codenumbers for everyone
-code2.to_csv('../data/id_code2.txt', index=False, header=False, sep=' ')
-
-print(code2.info())
-
+phantom_ped = pd.merge(left=ped, right=code, on='id', how='left')
 
 #renaming the columns for a pedigree file with code id's
 code.columns = ['sire', 'code_sire']
 #sire code id's merged with a pedigree file
-ped = pd.merge(left=ped, right=code, on='sire', how='left').fillna(0, downcast='infer')
+phantom_ped = pd.merge(left=phantom_ped, right=code, on='sire', how='left').fillna(0, downcast='infer')
 
 #renaming the columns for a pedigree file with code id's
 code.columns = ['dam', 'code_dam']
 #dam code id's merged with a pedigree file
-ped = pd.merge(left=ped, right=code, on='dam', how='left').fillna(0, downcast='infer')
+phantom_ped = pd.merge(left=phantom_ped, right=code, on='dam', how='left').fillna(0, downcast='infer')
 
 #The pedigree file for DMU needs 4 columns, column 4 will be the code id's again
-ped['code_id2'] = ped['code_id']
+phantom_ped['code_id2'] = phantom_ped['code_id']
 
-ped = ped.sort_values(by=['code_id'])
-#Creation of a pedigree file with code id's to be used in DMU
-dmu_ped_code = ped[['code_id','code_sire','code_dam','code_id2']]
-dmu_ped_code.to_csv("../data/dmu_ped_code.ped", index=False, header=False, sep=' ')
+phantom_ped = phantom_ped.sort_values(by=['code_id'])
 
-
-ped = ped.sort_values(by=['id'])
-#Creation of a pedigree file with with normal id's
-dmu_ped = ped[['id','sire','dam']]
-dmu_ped['BY'] = (dmu_ped.id.astype(str).str[:4]).astype(int)
-dmu_ped.to_csv("../data/dmu_ped.ped", index=False, header=False, sep=' ')
-np.savetxt('../data/dmu_pedx.txt', dmu_ped, fmt='%+15s %+15s %+15s %+4s')
-
-#--------------------------------------------------------------------
-
-#Create a pedigree file with phantom grouping for no parents
-phantom_ped = ped[['id','code_id','code_sire','code_dam','code_id2']].copy()
-
-#Make birth year from id number an integer
 phantom_ped['BY'] = (phantom_ped.id.astype(str).str[:4]).astype(int)
 
 #All parents from animals older than 1970 go into same group
@@ -292,11 +250,9 @@ phantom_ped.loc[
 (phantom_ped['code_dam'] == 0) & (phantom_ped['BY']  >= 2019)
 ,'code_dam'] = -28
 
-dmu_ped_phantom = phantom_ped[['code_id','code_sire','code_dam','code_id2']]
-dmu_ped_phantom = dmu_ped_phantom.sort_values(by=['code_id'])
-dmu_ped_phantom.to_csv("../data/dmu_ped_phantom2.ped", index=False, header=False, sep=' ')
+#Creation of a pedigree file with code id's to be used in DMU
+dmu_ped_code = phantom_ped[['code_id','code_sire','code_dam','code_id2']]
+dmu_ped_code.to_csv("../data/dmu_ped_code_5gen.ped", index=False, header=False, sep=' ')
 
 
-print(phantom_ped.iloc[100:115])
-print(phantom_ped.iloc[50000:50015])
-print(phantom_ped.info())
+print(dmu_ped_code.info())

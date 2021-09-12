@@ -443,3 +443,24 @@ cows_df[['H_BY','HC1','HC2','HC3']] = cows_df[
 #     ['first_h','first_1','first_2','first_3']
 #     ].apply(
 #     lambda s: s.dt.strftime('%Y%m').replace('NaT', '0').astype(int))
+
+
+# print(Counter(sires['sire_count']).keys()) # equals to list(set(words))
+# print(Counter(sires['sire_count']).values()) # counts the elements' frequency
+
+
+#---------------------------------------------------------------------------
+#Number of calvings in data counted
+#This is so wrong observations can be cleaned away
+#---------------------------------------------------------------------------
+#calvings extracted from cows dataframe
+df_temp = cows_df.loc[:, ['calv1','calv2','calv3','calv4']]
+
+#calvings counted, will return NaN if calvings in wrong order
+df2  = df_temp.copy()
+df2.columns = np.arange(df2.shape[1]) + 1
+mask = (df2.apply(pd.Series.last_valid_index, axis=1).fillna(0) == df2.count(axis=1))
+df_temp.loc[mask, 'no_calv'] = df_temp.notna().sum(1)
+
+#Adds the calving count to the cows data
+cows_df['no_calv'] = df_temp['no_calv']

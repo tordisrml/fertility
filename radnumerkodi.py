@@ -5,7 +5,7 @@ import numpy as np
 #Datafile 1, info about inseminations. One line for every ins.
 #---------------------------------------------------------------------------
 df = pd.read_csv(
-    "../data/dmu_fertilitynew.txt",
+    "../data/dmu_fertilitynew2.txt",
     header=None,
     sep = ' ',
     names=['code_id','HBY','HC1','HC2','HC3','IYM0','IYM1','IYM2',
@@ -34,11 +34,21 @@ df = pd.merge(left=code_df, right=df, on='code_id', how='outer')
 
 df['BY'] = (df.id.astype(str).str[:4]).astype(int)
 
-df.loc[(df['BY'] == 2018) & (df['IYM1'] > 0) ,'stada'] = 1
 df.loc[(df['BY'] == 2017) & (df['IYM1'] > 0) ,'stada'] = 1
-df.loc[(df['BY'] == 2018) & (df['IYM1'] == 0) ,'stada'] = 0
+df.loc[(df['BY'] == 2016) & (df['IYM1'] > 0) ,'stada'] = 1
+df.loc[(df['BY'] == 2015) & (df['IYM1'] > 0) ,'stada'] = 1
+df.loc[(df['BY'] == 2014) & (df['IYM1'] > 0) ,'stada'] = 1
+df.loc[(df['BY'] == 2013) & (df['IYM1'] > 0) ,'stada'] = 1
+df.loc[(df['BY'] == 2012) & (df['IYM1'] > 0) ,'stada'] = 1
+
 df.loc[(df['BY'] == 2017) & (df['IYM1'] == 0) ,'stada'] = 0
-df.loc[(df['BY'] != 2018) & (df['BY'] != 2017) ,'stada'] = 0
+df.loc[(df['BY'] == 2016) & (df['IYM1'] == 0) ,'stada'] = 0
+df.loc[(df['BY'] == 2015) & (df['IYM1'] == 0) ,'stada'] = 0
+df.loc[(df['BY'] == 2014) & (df['IYM1'] == 0) ,'stada'] = 0
+df.loc[(df['BY'] == 2013) & (df['IYM1'] == 0) ,'stada'] = 0
+df.loc[(df['BY'] == 2012) & (df['IYM1'] == 0) ,'stada'] = 0
+
+df.loc[(df['BY'] > 2017) | (df['BY'] < 2012) ,'stada'] = 0
 
 df.loc[
 (df['IYM1'] > 0) &
@@ -68,6 +78,13 @@ df.loc[
 radnrkodi = df[['id','code_id','stada','norec','HC1','IYM1', 'AGEc_1','sex']].fillna(0, downcast='infer')
 
 print(radnrkodi.iloc[503000:503015])
+print(df.info())
 print(radnrkodi.info())
 
+print(df['stada'].value_counts())
+print(df['HC1'].value_counts())
+print(df['IYM1'].value_counts())
+print(df['AGEc_1'].value_counts())
+
+radnrkodi.to_csv("../data/radnrkodix.txt", index=False, header=False, sep=' ')
 np.savetxt('../data/radnrkodi.txt', radnrkodi, fmt='%+15s %+8s %+2s %+2s %+9s %+9s %+9s %+1s ')

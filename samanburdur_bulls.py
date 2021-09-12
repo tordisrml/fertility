@@ -19,7 +19,7 @@ from scipy.stats import spearmanr
 #Read in file where results from inbreeding, phantom group and old breeding
 #value results are located.
 saman = pd.read_csv(
-    "../data/saman_I_P_G_new2.txt",
+    "../data/saman_I_P_G_new3.txt",
     header=None,
     sep=' ',
     names=['id',
@@ -29,10 +29,41 @@ saman = pd.read_csv(
         'fertility_1','fertility_2','fertility_3','frjosemi']
     )
 
+#Reading in the file used in DMU so animals that have their own observations
+#can be located
+ownobs = pd.read_csv(
+    "../data/dmu_fertilitynew2.txt",
+    header=None,
+    sep=' ',
+    names=['code_id',
+        'CR0_I','ICF1_I','ICF2_I','ICF3_I','IFL1_I','IFL2_I','IFL3_I',
+        'CR0_P','ICF1_P','ICF2_P','ICF3_P','IFL1_P','IFL2_P','IFL3_P',
+        'CI12_I','CI23_I','CI34_I',
+        'fertility_1','fertility_2','fertility_3','frjosemi']
+    )
+
+#Reading in id codes to replace in SOL files
+id_code = pd.read_csv(
+    "/home/thordis/data/id_code.txt",
+    header=None,
+    sep = ' ',
+    names=['id','code_id']
+    )
+
+#Merging ownobs and id file to bring back einstaklingsnumer used in huppa
+ownobs = pd.merge(left=ownobs[
+    ['code_id']
+    ], right=id_code[['id','code_id']], on='code_id', how='inner')
+
 #Make birth year from id number an integer
 saman['BY'] = (saman.id.astype(str).str[:4]).astype(int)
 
-ave_group = saman.loc[(saman['BY'] >= 2008) & (saman['BY'] <= 2018)]
+ave_group = saman.loc[(saman['BY'] >= 2012) & (saman['BY'] <= 2017)]
+
+#Merging ownobs and id file to bring back einstaklingsnumer used in huppa
+ave_group = pd.merge(left=ownobs['id'], right=ave_group, on='id', how='left')
+print(ave_group.iloc[300:315])
+print(ave_group.info())
 
 CR0_SD_I = ave_group['CR0_I'].std()
 ICF1_SD_I = ave_group['ICF1_I'].std()
@@ -71,23 +102,23 @@ IFL2_mean_P = ave_group['IFL2_P'].mean()
 IFL3_mean_P = ave_group['IFL3_P'].mean()
 
 saman['CR0_I'] = 100+(((saman['CR0_I']- CR0_mean_I ) / CR0_SD_I) * 10 )
-saman['ICF1_I'] = 100+(((saman['ICF1_I']*(-1) - ICF1_mean_I ) / ICF1_SD_I) * 10 )
-saman['ICF2_I'] = 100+(((saman['ICF2_I']*(-1)- ICF2_mean_I ) / ICF2_SD_I) * 10 )
-saman['ICF3_I'] = 100+(((saman['ICF3_I']*(-1)- ICF3_mean_I ) / ICF3_SD_I) * 10 )
-saman['IFL1_I'] = 100+(((saman['IFL1_I']*(-1)- IFL1_mean_I ) / IFL1_SD_I) * 10 )
-saman['IFL2_I'] = 100+(((saman['IFL2_I']*(-1)- IFL2_mean_I ) / IFL2_SD_I) * 10 )
-saman['IFL3_I'] = 100+(((saman['IFL3_I']*(-1)- IFL3_mean_I ) / IFL3_SD_I) * 10 )
-saman['CI12_I'] = 100+(((saman['CI12_I']*(-1)- CI12_mean_I ) / CI12_SD_I) * 10 )
-saman['CI23_I'] = 100+(((saman['CI23_I']*(-1)- CI23_mean_I ) / CI23_SD_I) * 10 )
-saman['CI34_I'] = 100+(((saman['CI34_I']*(-1)- CI34_mean_I ) / CI34_SD_I) * 10 )
+saman['ICF1_I'] = 100+(((saman['ICF1_I']- ICF1_mean_I )*(-1) / ICF1_SD_I) * 10 )
+saman['ICF2_I'] = 100+(((saman['ICF2_I']- ICF2_mean_I )*(-1) / ICF2_SD_I) * 10 )
+saman['ICF3_I'] = 100+(((saman['ICF3_I']- ICF3_mean_I )*(-1) / ICF3_SD_I) * 10 )
+saman['IFL1_I'] = 100+(((saman['IFL1_I']- IFL1_mean_I )*(-1) / IFL1_SD_I) * 10 )
+saman['IFL2_I'] = 100+(((saman['IFL2_I']- IFL2_mean_I )*(-1) / IFL2_SD_I) * 10 )
+saman['IFL3_I'] = 100+(((saman['IFL3_I']- IFL3_mean_I )*(-1) / IFL3_SD_I) * 10 )
+saman['CI12_I'] = 100+(((saman['CI12_I']- CI12_mean_I )*(-1) / CI12_SD_I) * 10 )
+saman['CI23_I'] = 100+(((saman['CI23_I']- CI23_mean_I )*(-1) / CI23_SD_I) * 10 )
+saman['CI34_I'] = 100+(((saman['CI34_I']- CI34_mean_I )*(-1) / CI34_SD_I) * 10 )
 
 saman['CR0_P'] = 100+(((saman['CR0_P']- CR0_mean_P ) / CR0_SD_P) * 10 )
-saman['ICF1_P'] = 100+(((saman['ICF1_P']*(-1)- ICF1_mean_P ) / ICF1_SD_P) * 10 )
-saman['ICF2_P'] = 100+(((saman['ICF2_P']*(-1)- ICF2_mean_P ) / ICF2_SD_P) * 10 )
-saman['ICF3_P'] = 100+(((saman['ICF3_P']*(-1)- ICF3_mean_P ) / ICF3_SD_P) * 10 )
-saman['IFL1_P'] = 100+(((saman['IFL1_P']*(-1)- IFL1_mean_P ) / IFL1_SD_P) * 10 )
-saman['IFL2_P'] = 100+(((saman['IFL2_P']*(-1)- IFL2_mean_P ) / IFL2_SD_P) * 10 )
-saman['IFL3_P'] = 100+(((saman['IFL3_P']*(-1)- IFL3_mean_P ) / IFL3_SD_P) * 10 )
+saman['ICF1_P'] = 100+(((saman['ICF1_P']- ICF1_mean_P )*(-1) / ICF1_SD_P) * 10 )
+saman['ICF2_P'] = 100+(((saman['ICF2_P']- ICF2_mean_P )*(-1) / ICF2_SD_P) * 10 )
+saman['ICF3_P'] = 100+(((saman['ICF3_P']- ICF3_mean_P )*(-1) / ICF3_SD_P) * 10 )
+saman['IFL1_P'] = 100+(((saman['IFL1_P']- IFL1_mean_P )*(-1) / IFL1_SD_P) * 10 )
+saman['IFL2_P'] = 100+(((saman['IFL2_P']- IFL2_mean_P )*(-1) / IFL2_SD_P) * 10 )
+saman['IFL3_P'] = 100+(((saman['IFL3_P']- IFL3_mean_P )*(-1) / IFL3_SD_P) * 10 )
 
 
 #Creating a single ICF and IFL value
@@ -272,6 +303,6 @@ print(sires50.info())
 sires50 = sires50.astype(float).round().astype(int)
 
 # #Saves the dataframe to excel file
-sires50.to_excel("../data/sires50_100scale20210822.xlsx", index=False, header=True)
+sires50.to_excel("../data/sires50_100scale20210824.xlsx", index=False, header=True)
 #
 # #plt.savefig('plot.png')

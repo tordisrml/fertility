@@ -20,10 +20,24 @@ import numpy as np
 import datetime
 
 #---------------------------------------------------------------------------
+#Info for program, can be replaced
+#---------------------------------------------------------------------------
+#Date of the data collection from Huppa!
+collectiondate = pd.to_datetime('20210625', format='%Y%m%d')
+#---------------------------------------------------------------------------
+#Name of insemination file from Huppa
+insfile = "../data/saedingar.csv"
+#Name of cow file from Huppa
+cowfile = "../data/gripalisti.csv"
+#Name of output file for DMU
+outputfile = "../data/dmu_fertility20210911.txt"
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
 #Datafile 1, info about inseminations. One line for every ins.
 #---------------------------------------------------------------------------
 ins_df = pd.read_csv(
-    "../data/saedingar.csv",
+    insfile,
     header=None,
     sep = '\t',
     names=['id','ins','tech','comment','lact']
@@ -33,7 +47,7 @@ print( f'Reading saedingar is finished' )
 #Datafile 2, info about cows. One line for every cow.
 #---------------------------------------------------------------------------
 cows_df = pd.read_csv(
-    "../data/gripalisti.csv",
+    cowfile,
     header=None,
     sep = '\t',
     names=['id','herd','birth','death','calv1','calv2','calv3','calv4']
@@ -58,17 +72,36 @@ ins_df = ins_df.sort_values(by=['id','ins'])
 #Number of calvings in data counted
 #This is so wrong observations can be cleaned away
 #---------------------------------------------------------------------------
-#calvings extracted from cows dataframe
-df_temp = cows_df.loc[:, ['calv1','calv2','calv3','calv4']]
-
-#calvings counted, will return NaN if calvings in wrong order
-df2  = df_temp.copy()
-df2.columns = np.arange(df2.shape[1]) + 1
-mask = (df2.apply(pd.Series.last_valid_index, axis=1).fillna(0) == df2.count(axis=1))
-df_temp.loc[mask, 'no_calv'] = df_temp.notna().sum(1)
-
-#Adds the calving count to the cows data
-cows_df['no_calv'] = df_temp['no_calv']
+cows_df.loc[
+(cows_df['calv1'].notnull().astype(int) == 0) &
+(cows_df['calv2'].notnull().astype(int) == 0) &
+(cows_df['calv3'].notnull().astype(int) == 0) &
+(cows_df['calv4'].notnull().astype(int) == 0)
+,'no_calv'] = 0
+cows_df.loc[
+(cows_df['calv1'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 0) &
+(cows_df['calv3'].notnull().astype(int) == 0) &
+(cows_df['calv4'].notnull().astype(int) == 0)
+,'no_calv'] = 1
+cows_df.loc[
+(cows_df['calv1'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 1) &
+(cows_df['calv3'].notnull().astype(int) == 0) &
+(cows_df['calv4'].notnull().astype(int) == 0)
+,'no_calv'] = 2
+cows_df.loc[
+(cows_df['calv1'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 1) &
+(cows_df['calv3'].notnull().astype(int) == 1) &
+(cows_df['calv4'].notnull().astype(int) == 0)
+,'no_calv'] = 3
+cows_df.loc[
+(cows_df['calv1'].notnull().astype(int) == 1) &
+(cows_df['calv2'].notnull().astype(int) == 1) &
+(cows_df['calv3'].notnull().astype(int) == 1) &
+(cows_df['calv4'].notnull().astype(int) == 1)
+,'no_calv'] = 4
 
 #Faulty obs. collected and marked as 9
 cows_df.loc[
@@ -77,10 +110,22 @@ cows_df.loc[
 'no_calv'] = 9
 #wrongcalv_df.to_csv('wrongcalv.csv', index=False)
 #---------------------------------------------------------------------------
-
+#---------------------------------------------------------------------------
+# Is the cow culled after any lactation?
+# --------------------------------------
+# Heifers
+cows_df.loc[
+(cows_df['no_calv'] == 0) & (cows_df['death'].notnull().astype(int) == 1), 'culled'] = 0
+cows_df.loc[
+(cows_df['no_calv'] == 1) & (cows_df['death'].notnull().astype(int) == 1), 'culled'] = 1
+cows_df.loc[
+(cows_df['no_calv'] == 2) & (cows_df['death'].notnull().astype(int) == 1), 'culled'] = 2
+cows_df.loc[
+(cows_df['no_calv'] == 3) & (cows_df['death'].notnull().astype(int) == 1), 'culled'] = 3
+# --------------------------------------
 #---------------------------------------------------------------------------
 #Two files merged into one file where info about cows follows each ins.
-df = pd.merge(left=ins_df, right=cows_df)
+df = pd.merge(left=ins_df, right=cows_df,on='id' )
 print( f'Gripalisti and saedingar have been merged' )
 #---------------------------------------------------------------------------
 
@@ -132,108 +177,55 @@ print( f'Lactation for inseminations have been found' )
 #---------------------------------------------------------------------------
 #Splitting info into lactations and counting ins per lact.
 #---------------------------------------------------------------------------
-heifers_df = df[(df['ins_lact'] == 0.0) | (df['ins_lact'] == 7.0)]
-lact1_df = df[df['ins_lact'] == 1.0]
-lact2_df = df[df['ins_lact'] == 2.0]
-lact3_df = df[df['ins_lact'] == 3.0]
+heifers_df = df.loc[(df['ins_lact'] == 0.0) | (df['ins_lact'] == 7.0)]
+lact1_df = df.loc[df['ins_lact'] == 1.0]
+lact2_df = df.loc[df['ins_lact'] == 2.0]
+lact3_df = df.loc[df['ins_lact'] == 3.0]
 #---------------------------------------------------------------------------
 
 #Wrong ins were marked and collected
-wrongins = df[(df['ins_lact'] == 99.0) | (df['ins_lact'] == 88.0) |
+wrongins = df.loc[(df['ins_lact'] == 99.0) | (df['ins_lact'] == 88.0) |
 (df['ins_lact'] == 77.0)]
+wrongins.loc[:,'check'] = 1
+wrongins = wrongins[['id','check']]
+wrongins.columns = ['id', 'ins_lact']
+wrongins = wrongins.drop_duplicates(subset=['id'])
 #They are merged into the cows dataframe so cows can be cleaned away later
 cows_df = pd.merge(left=cows_df[
-['id','herd','birth','death','calv1','calv2','calv3','calv4','no_calv']
+['id','herd','birth','death','calv1','calv2','calv3','calv4','no_calv','culled']
 ], right=wrongins[['id','ins_lact']], on='id', how='left')
 #---------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------
-#Heifers
-#The number of each ins is counted and the total number of ins
-heifers_df.loc[:,'T'] = heifers_df.groupby('id')['id'].transform('count')
-heifers_df.loc[:,'No'] = heifers_df.groupby('id')['id'].cumcount() + 1
-#The last ins
-heifers_df.loc[
-(heifers_df['T'] == heifers_df['No']), 'last_h'] = heifers_df['ins']
-#Tota number of heifer ins
-heifers_df.loc[
-(heifers_df['T'] == heifers_df['No']), 'T_h'] = heifers_df['T']
-#First ins
-heifers_df.loc[
-(heifers_df['No'] == 1), 'first_h'] = heifers_df['ins']
-#First heifer tech
-heifers_df.loc[(heifers_df['No'] == 1), 'tech_h'] = heifers_df['tech']
-#First and last observations locaed
-firstheifers_df = heifers_df[heifers_df['first_h'] == heifers_df['ins'] ]
-lastheifers_df = heifers_df[heifers_df['last_h'] == heifers_df['ins']]
-#First and last observations put in seperate dataframes
-firstheifers_df = firstheifers_df.loc[:, ['id','first_h','tech_h']]
-lastheifers_df = lastheifers_df.loc[:, ['id','last_h','T_h']]
-#First and last heifer ins merged into one dataframe
-heifers_df = pd.merge(left=firstheifers_df, right=lastheifers_df)
+#This is a function to count ins per lactation and collect the first and last ins
+def inscount (df1,firstins, lastins, T, tech):
+    df1.loc[:,'T'] = df1.groupby('id')['id'].transform('count') #Total ins
+    df1.loc[:,'No'] = df1.groupby('id')['id'].cumcount() + 1 #number of each ins
+    #The last ins
+    df1.loc[(df1['T'] == df1['No']), lastins] = df1['ins']
+    #Tota number of heifer ins
+    df1.loc[(df1['T'] == df1['No']), T] = df1['T']
+    #First ins
+    df1.loc[(df1['No'] == 1), firstins] = df1['ins']
+    #First heifer tech
+    df1.loc[(df1['No'] == 1), tech] = df1['tech']
+    #First and last observations locaed
+    first = df1[df1[firstins] == df1['ins'] ]
+    last = df1[df1[lastins] == df1['ins']]
+    #First and last observations put in seperate dataframes
+    first = first.loc[:, ['id',firstins,tech]]
+    last = last.loc[:, ['id',lastins,T]]
+    #First and last heifer ins merged into one dataframe
+    df1 = pd.merge(left=first, right=last)
+    df1['check'] = (collectiondate - df1[firstins]).dt.days
+    df1 = df1.loc[(df1['check'] > 302 )]
+    return df1
 #---------------------------------------------------------------------------
-#Lactation1
-#The number of each ins is counted and the total number of ins
-lact1_df.loc[:,'T'] = lact1_df.groupby('id')['id'].transform('count')
-lact1_df.loc[:,'No'] = lact1_df.groupby('id')['id'].cumcount() + 1
-#The last ins
-lact1_df.loc[(lact1_df['T'] == lact1_df['No']), 'last_1'] = lact1_df['ins']
-#Tota number of lact1 ins
-lact1_df.loc[(lact1_df['T'] == lact1_df['No']), 'T_1'] = lact1_df['T']
-#First ins
-lact1_df.loc[(lact1_df['No'] == 1), 'first_1'] = lact1_df['ins']
-#First lact1 tech
-lact1_df.loc[(lact1_df['No'] == 1), 'tech_1'] = lact1_df['tech']
-#First and last observations locaed
-firstlact1_df = lact1_df[lact1_df['first_1'] == lact1_df['ins'] ]
-lastlact1_df = lact1_df[lact1_df['last_1'] == lact1_df['ins']]
-#First and last observations put in seperate dataframes
-firstlact1_df = firstlact1_df.loc[:, ['id','first_1','tech_1']]
-lastlact1_df = lastlact1_df.loc[:, ['id','last_1','T_1']]
-#First and last lact1 ins merged into one dataframe
-lact1_df = pd.merge(left=firstlact1_df, right=lastlact1_df)
+heifers_df = inscount(heifers_df, 'first_h', 'last_h', 'T_h', 'tech_h' )
+lact1_df = inscount(lact1_df, 'first_1', 'last_1', 'T_1', 'tech_1' )
+lact2_df = inscount(lact2_df, 'first_2', 'last_2', 'T_2', 'tech_2' )
+lact3_df = inscount(lact3_df, 'first_3', 'last_3', 'T_3', 'tech_3' )
 #---------------------------------------------------------------------------
-#Lactation2
-#The number of each ins is counted and the total number of ins
-lact2_df.loc[:,'T'] = lact2_df.groupby('id')['id'].transform('count')
-lact2_df.loc[:,'No'] = lact2_df.groupby('id')['id'].cumcount() + 1
-#The last ins
-lact2_df.loc[(lact2_df['T'] == lact2_df['No']), 'last_2'] = lact2_df['ins']
-#Tota number of lact2 ins
-lact2_df.loc[(lact2_df['T'] == lact2_df['No']), 'T_2'] = lact2_df['T']
-#First ins
-lact2_df.loc[(lact2_df['No'] == 1), 'first_2'] = lact2_df['ins']
-#First lact2 tech
-lact2_df.loc[(lact2_df['No'] == 1), 'tech_2'] = lact2_df['tech']
-#First and last observations locaed
-firstlact2_df = lact2_df[lact2_df['first_2'] == lact2_df['ins'] ]
-lastlact2_df = lact2_df[lact2_df['last_2'] == lact2_df['ins']]
-#First and last observations put in seperate dataframes
-firstlact2_df = firstlact2_df.loc[:, ['id','first_2','tech_2']]
-lastlact2_df = lastlact2_df.loc[:, ['id','last_2','T_2']]
-#First and last lact2 ins merged into one dataframe
-lact2_df = pd.merge(left=firstlact2_df, right=lastlact2_df)
-#---------------------------------------------------------------------------
-#Lactation3
-#The number of each ins is counted and the total number of ins
-lact3_df.loc[:,'T'] = lact3_df.groupby('id')['id'].transform('count')
-lact3_df.loc[:,'No'] = lact3_df.groupby('id')['id'].cumcount() + 1
-#The last ins
-lact3_df.loc[(lact3_df['T'] == lact3_df['No']), 'last_3'] = lact3_df['ins']
-#Tota number of lact3 ins
-lact3_df.loc[(lact3_df['T'] == lact3_df['No']), 'T_3'] = lact3_df['T']
-#First ins
-lact3_df.loc[(lact3_df['No'] == 1), 'first_3'] = lact3_df['ins']
-#First lact3 tech
-lact3_df.loc[(lact3_df['No'] == 1), 'tech_3'] = lact3_df['tech']
-#First and last observations locaed
-firstlact3_df = lact3_df[lact3_df['first_3'] == lact3_df['ins'] ]
-lastlact3_df = lact3_df[lact3_df['last_3'] == lact3_df['ins']]
-#First and last observations put in seperate dataframes
-firstlact3_df = firstlact3_df.loc[:, ['id','first_3','tech_3']]
-lastlact3_df = lastlact3_df.loc[:, ['id','last_3','T_3']]
-#First and last lact3 ins merged into one dataframe
-lact3_df = pd.merge(left=firstlact3_df, right=lastlact3_df)
 
 #These results are merged into the cows data
 cows_df = cows_df.merge(heifers_df, on='id', how='outer')
@@ -247,39 +239,45 @@ print( f'First and last inseminations have been found' )
 #Feritlity traits and traits for cleaning and fixed effecsts
 #---------------------------------------------------------------------------
 #Age at first ins at each lact
-cows_df['AGEi_h'] = (cows_df['first_h'] - cows_df['birth']).dt.days
+cows_df.loc[:,'AGEi_h'] = (cows_df['first_h'] - cows_df['birth']).dt.days
 #cows_df['AGEi_1'] = (cows_df['first_1'] - cows_df['birth']).dt.days
 #cows_df['AGEi_2'] = (cows_df['first_2'] - cows_df['birth']).dt.days
 #cows_df['AGEi_3'] = (cows_df['first_3'] - cows_df['birth']).dt.days
 #Age at calving at each lact
-cows_df['AGEc_1'] = (cows_df['calv1'] - cows_df['birth']).dt.days
-cows_df['AGEc_2'] = (cows_df['calv2'] - cows_df['birth']).dt.days
-cows_df['AGEc_3'] = (cows_df['calv3'] - cows_df['birth']).dt.days
+cows_df.loc[:,'AGEc_1'] = (cows_df['calv1'] - cows_df['birth']).dt.days
+cows_df.loc[:,'AGEc_2'] = (cows_df['calv2'] - cows_df['birth']).dt.days
+cows_df.loc[:,'AGEc_3'] = (cows_df['calv3'] - cows_df['birth']).dt.days
 #Gestation lenght
-cows_df['gest1'] = (cows_df['calv1'] - cows_df['last_h']).dt.days
-cows_df['gest2'] = (cows_df['calv2'] - cows_df['last_1']).dt.days
-cows_df['gest3'] = (cows_df['calv3'] - cows_df['last_2']).dt.days
+cows_df.loc[:,'gest1'] = (cows_df['calv1'] - cows_df['last_h']).dt.days
+cows_df.loc[:,'gest2'] = (cows_df['calv2'] - cows_df['last_1']).dt.days
+cows_df.loc[:,'gest3'] = (cows_df['calv3'] - cows_df['last_2']).dt.days
 #Calving interval
-cows_df['CI12'] = (cows_df['calv2'] - cows_df['calv1']).dt.days
-cows_df['CI23'] = (cows_df['calv3'] - cows_df['calv2']).dt.days
-cows_df['CI34'] = (cows_df['calv4'] - cows_df['calv3']).dt.days
+cows_df.loc[:,'CI12'] = (cows_df['calv2'] - cows_df['calv1']).dt.days
+cows_df.loc[:,'CI23'] = (cows_df['calv3'] - cows_df['calv2']).dt.days
+cows_df.loc[:,'CI34'] = (cows_df['calv4'] - cows_df['calv3']).dt.days
 #---------------------------------------------------------------------------
 #Fertility trait, days between calving and first ins
-cows_df['ICF1'] = (cows_df['first_1'] - cows_df['calv1']).dt.days
-cows_df['ICF2'] = (cows_df['first_2'] - cows_df['calv2']).dt.days
-cows_df['ICF3'] = (cows_df['first_3'] - cows_df['calv3']).dt.days
+cows_df.loc[:,'ICF1'] = (cows_df['first_1'] - cows_df['calv1']).dt.days
+cows_df.loc[:,'ICF2'] = (cows_df['first_2'] - cows_df['calv2']).dt.days
+cows_df.loc[:,'ICF3'] = (cows_df['first_3'] - cows_df['calv3']).dt.days
 #Fertility trait, days between first and last ins
-cows_df['IFLh'] = (cows_df['last_h'] - cows_df['first_h']).dt.days
-cows_df['IFL1'] = (cows_df['last_1'] - cows_df['first_1']).dt.days
-cows_df['IFL2'] = (cows_df['last_2'] - cows_df['first_2']).dt.days
-cows_df['IFL3'] = (cows_df['last_3'] - cows_df['first_3']).dt.days
+cows_df.loc[:,'IFLh'] = (cows_df['last_h'] - cows_df['first_h']).dt.days
+cows_df.loc[:,'IFL1'] = (cows_df['last_1'] - cows_df['first_1']).dt.days
+cows_df.loc[:,'IFL2'] = (cows_df['last_2'] - cows_df['first_2']).dt.days
+cows_df.loc[:,'IFL3'] = (cows_df['last_3'] - cows_df['first_3']).dt.days
+#1-4 days count as one ins period so IFL set to zero
+cows_df.loc[(cows_df['IFLh'] <= 4) &(cows_df['IFLh'] >= 1),'IFLh'] = 0
+cows_df.loc[(cows_df['IFL1'] <= 4) &(cows_df['IFL1'] >= 1),'IFL1'] = 0
+cows_df.loc[(cows_df['IFL2'] <= 4) &(cows_df['IFL2'] >= 1),'IFL2'] = 0
+cows_df.loc[(cows_df['IFL3'] <= 4) &(cows_df['IFL3'] >= 1),'IFL3'] = 0
+#---------------------------------------------------------------------------
+cows_df.loc[(cows_df['IFL1'] == 0) &(cows_df['calv2'].notnull().astype(int) == 0),'IFL1'] = 21
+cows_df.loc[(cows_df['IFL2'] == 0) &(cows_df['calv3'].notnull().astype(int) == 0),'IFL2'] = 21
+cows_df.loc[(cows_df['IFL3'] == 0) &(cows_df['calv4'].notnull().astype(int) == 0),'IFL3'] = 21
+#---------------------------------------------------------------------------
 #Fertility trait, conception rate at first calving for heifers
 cows_df.loc[
-(cows_df['IFLh'] == 0) |
-(cows_df['IFLh'] == 1) |
-(cows_df['IFLh'] == 2) |
-(cows_df['IFLh'] == 3) |
-(cows_df['IFLh'] == 4) &
+(cows_df['IFLh'] == 0) &
 (cows_df['calv1'].notnull().astype(int) == 1), #calv1, there is an obsv.
 'CRh'] = 1
 cows_df.loc[
@@ -294,7 +292,7 @@ cows_df.loc[
 print( f'Fertility traits have been created' )
 #---------------------------------------------------------------------------
 #---------------------------------------------------------------------------
-#Cleaning starts, animals who are sorted out are collected into a seperate file
+#Cleaning starts, animals who are sorted out can be collected into a seperate file
 # a) Age at first calving 550-1100 days
 # b) Age at first ins 270-900 days
 # c) Calving interval 208-600 days
@@ -302,7 +300,6 @@ print( f'Fertility traits have been created' )
 # e) Number of ins 1-8 per lact
 # f) ICF 20-230 days
 # g) IFL 0-365 days
-
 #---------------------------------------------------------------------------
 #Other cleaning:
 #Herd missing
@@ -312,9 +309,7 @@ print( f'Fertility traits have been created' )
 #Ins with comments cleaned away
 #Records for later lactations were excluded if information about previous lactations
     #were not available.
-
-#---------------------------------------------------------------------------
-
+#--------------------------------------------------------------------------
 # a) Age at first calving 550-1100 days
 cows_df.loc[
 (cows_df['AGEc_1'] < 550) | (cows_df['AGEc_1'] > 1100),
@@ -415,9 +410,7 @@ data_use = cows_df[(
     cows_df['wrong1'].notnull().astype(int) == 0) & (
     cows_df['wrong2'].notnull().astype(int) == 0) & (
     cows_df['wrong3'].notnull().astype(int) == 0) & (
-    cows_df['ins_lact'] != 99.0) & ( #ins did not register on a lactation
-    cows_df['ins_lact'] != 88.0) & ( #ins happens before 2008
-    cows_df['ins_lact'] != 77.0) & ( #ins has a comment
+    cows_df['ins_lact'] != 1.0) & ( #ins did not register on a lactation #ins happens before 2008 #ins has a comment
     cows_df['no_calv'] != 9.0) & ( #Order of calving not correct
     cows_df['check'].notnull().astype(int) == 1) #correct orders of ins.
 ]
@@ -430,9 +423,7 @@ data_not_used = cows_df[(
     cows_df['wrong1'].notnull().astype(int) == 1) | ( #first lact wrong
     cows_df['wrong2'].notnull().astype(int) == 1) | ( #second lact wrong
     cows_df['wrong3'].notnull().astype(int) == 1) | ( #third lact wrong
-    cows_df['ins_lact'] == 99.0) | (  #ins did not register on a lactation
-    cows_df['ins_lact'] == 88.0) & ( #ins happens before 2008
-    cows_df['ins_lact'] == 77.0) & ( #ins has a comment
+    cows_df['ins_lact'] == 1.0) | (  #ins did not register on a lactation #ins happens before 2008 #ins has a comment
     cows_df['no_calv'] == 9.0) & (  #Order of calving not correct
     cows_df['check'].notnull().astype(int) == 0)
 ]
@@ -505,7 +496,7 @@ def hy_grouping(element, df, col, group, df1):
 
             else:
                 # no groups to merge
-                print( f'Can not merge element {element}' )
+                print( f'Can not merge herd {herd}' )
                 break
 
             counts.loc[ counts[ 'group' ] == cgroup, 'group' ] = ngroup
@@ -685,7 +676,7 @@ dmu_fertility = data_use[['code_id','HBY','HC1','HC2','HC3','IYM0','IYM1','IYM2'
     'CRh','ICF1','ICF2','ICF3','IFL1','IFL2','IFL3']].copy()
 
 # DMU datafile
-dmu_fertility.to_csv("../data/dmu_fertilitynew2.txt", index=False, header=False, sep=' ')
+dmu_fertility.to_csv(outputfile, index=False, header=False, sep=' ')
 
 # # This is code to create a datafile to be used in some statistical analyses.
 # # -----------------------------------------------------------------------
@@ -705,12 +696,7 @@ dmu_fertility.to_csv("../data/dmu_fertilitynew2.txt", index=False, header=False,
 # fertility_stat.to_csv("../data/fertility_stat.txt", index=False, header=False, sep=' ')
 
 
-#print(cows_df.iloc[50000:50015])
+
 print(data_use.iloc[50000:50015])
 print(cows_df.info())
 print(data_use.info())
-# print(data_not_used.info())
-#print(cows_df.columns.tolist())
-#print(data_use['id'].nunique())
-#print(data_not_used['id'].nunique())
-#print(data_use.AGEc_3.unique())

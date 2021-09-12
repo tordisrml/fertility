@@ -5,13 +5,6 @@
 import pandas as pd
 import numpy as np
 
-#Reading in id codes to replace in SOL files
-id_code = pd.read_csv(
-    "/home/thordis/data/id_code.txt",
-    header=None,
-    sep = ' ',
-    names=['id','code_id']
-    )
 
 #-------------------------------------------------------------
 #CR0_ICF_IFL_phantom
@@ -35,12 +28,12 @@ sol = pd.read_fwf(
     )
 #Only keep genetic effectss
 #AND ID OVER 0 BECAUSE OF PHANTOM GROUP PARENTS
-sol = sol[(sol['1_code_effect'] == 4) & (sol['code_id'] > 0)]
+# sol = sol[(sol['1_code_effect'] == 4) & (sol['code_id'] > 0)]
+sol = sol[(sol['1_code_effect'] == 4) & (sol['code_id'] < 0)]
+print(sol.iloc[6:15])
+print(sol.info())
 #-------------------------------------------------------------
-#Merge the SOL and the id code file
-sol= pd.merge(left=sol[
-    ['code_id','2_trait_no', '6_no_obs','8_BLUP']
-    ], right=id_code[['id','code_id']], on='code_id', how='left')
+
 #Split the large file into smaller ones by lactations
 cr_sol = sol[sol['2_trait_no'] == 1 ]
 icf_sol1 = sol[sol['2_trait_no'] == 2 ]
@@ -59,21 +52,21 @@ ifl_sol2['BLUP_IFL2'] = ifl_sol2['8_BLUP']
 ifl_sol3['BLUP_IFL3'] = ifl_sol3['8_BLUP']
 #Merge the files so there will be a file with one line per cow with all solutions
 saman_phantom= pd.merge(left=cr_sol[
-    ['id', 'BLUP_CR0']
-    ], right=icf_sol1[['id','BLUP_ICF1']], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=icf_sol2[['id','BLUP_ICF2']
-    ], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=icf_sol3[['id','BLUP_ICF3']
-    ], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol1[['id','BLUP_IFL1']
-    ], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol2[['id','BLUP_IFL2']
-    ], on='id')
-saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol3[['id','BLUP_IFL3']
-    ], on='id')
+    ['code_id', 'BLUP_CR0']
+    ], right=icf_sol1[['code_id','BLUP_ICF1']], on='code_id')
+saman_phantom= pd.merge(left=saman_phantom, right=icf_sol2[['code_id','BLUP_ICF2']
+    ], on='code_id')
+saman_phantom= pd.merge(left=saman_phantom, right=icf_sol3[['code_id','BLUP_ICF3']
+    ], on='code_id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol1[['code_id','BLUP_IFL1']
+    ], on='code_id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol2[['code_id','BLUP_IFL2']
+    ], on='code_id')
+saman_phantom= pd.merge(left=saman_phantom, right=ifl_sol3[['code_id','BLUP_IFL3']
+    ], on='code_id')
 
 #Creating a file with new results
-saman_phantom.to_csv("../data/saman_phantomnew2.txt", index=False, header=False, sep=' ')
-
-print(saman_phantom.iloc[600000:600015])
+saman_phantom.to_excel("../data/saman_PHG.xlsx", index=False, header=True)
+#
+print(saman_phantom.iloc[6:15])
 print(saman_phantom.info())
